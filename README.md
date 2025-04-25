@@ -12,3 +12,11 @@ This project is based on the following works, researches and websites:
 - Bitluni Youtube Video 1 https://youtu.be/G70CZLPjsXU?si=ko8MXyLOYsmnInwa
 - Bitluni Youtube Video 2 https://youtu.be/qJ68fRff5_k?si=IU3CtBIWtU_ItHb_
 - Bitluni Github Repo https://github.com/bitluni/ESP32Lib
+
+
+
+# NOTES:
+- ESP-IDF Framework for programming
+- DMA & I2S parallel mode for fast switching digital pins and responsiveness
+- MCU used ESP32-WROOM32 (better if ESP32-S3/C3)
+
