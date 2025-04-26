@@ -1,0 +1,2 @@
+source /home/mark/Documents/Progetti/VGASimpleDriver/build/bootloader/gdbinit/symbols
+source /home/mark/Documents/Progetti/VGASimpleDriver/build/bootloader/gdbinit/connect

@@ -18,7 +18,7 @@ This project is based on the following works, researches and websites:
 
 # NOTES:
 - MCU used ESP32-WROOM32 (better if ESP32-S3)
-- ESP-IDF Framework for programming
+- ESP-IDF Framework for bare-metal programming and debugging (C language)
 - DMA & I2S parallel mode for fast switching digital pins and responsiveness
 - Built-in DAC used to get to required voltage levels for RGB signals
 
