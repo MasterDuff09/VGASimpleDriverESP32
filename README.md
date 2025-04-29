@@ -3,7 +3,7 @@
 - Hardware required: VGA CABLE, ESP32 and TV with VGA Port, eletrical resistors
 
 # NOTES:
-- MCU used ESP32-WROOM32 (better if ESP32-S3)
+- MCU used ESP32-WROOM32
 - ESP-IDF Framework for bare-metal programming and debugging (C language)
 - DMA & I2S parallel mode for fast switching digital pins and responsiveness
 - Built-in DAC used to get to required voltage levels for RGB signals
@@ -25,6 +25,7 @@ This project is based on the following works, researches and websites:
 # SPECIFICS
 BASIC VGA works by syncronizing every RGB pixel by some specific periods given by the resolution and frequency choosen. The full explanation can be found on the videos I've linked above. Following the table of various timings, I choose for this project a resolution of 800x600 which has a pixel clock at 40 Mhz, a common frequency that a MCU such as the ESP32 can handle without any kind of concerns.
 It must be said that normal digital toggling is not used (for H-SYNC and V-SYNC) but a combination of I2S, a peripheral which used mostly for audio sampling (fast sampling and toggling signals) and DMA (Direct Memory Access) so that CPU is bypassed, thus no delays are encountered. Other specifics can be found by looking at the code.
+I2S will be also used to generate the required voltage range (0V - 0.7V) for the RGB signals, synchronized with the active period of both H-SYNC and V-SYNC.
 
 
 
