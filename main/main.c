@@ -1,18 +1,13 @@
-
-
-
+// main.c
 #include <stdio.h>
-#include <inttypes.h>
-#include "sdkconfig.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
+#include <string.h>
 
 
 
 void app_main(void)
 {
-    printf("Hello world!\n");
-    fflush(stdout);
-
+    // Initialize the UART
+    const char *message = "Hello, FreeRTOS!";
+    printf("%s\n", message);
+    fflush(stdout); // Ensure the message is printed immediately
 }
