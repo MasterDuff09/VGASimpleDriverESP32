@@ -34,7 +34,7 @@ void app_main(void)
     fflush(stdout); // Ensure the message is printed immediately
     int chunk_counter = PATTERN_TO_BUF_SIZE / MEM_CHUNK_1KB;
     for (uint8_t i = 0; i < chunk_counter; i++){
-        pattern_chunks[i] = heap_caps_malloc(MEM_CHUNK_1KB, MALLOC_CAP_DMA);
+        pattern_chunks[i] = heap_caps_malloc(MEM_CHUNK_1KB, MALLOC_CAP_8BIT | MALLOC_CAP_DMA);
         if (pattern_chunks[i] == NULL) {
             printf("Failed to allocate memory for chunk %d\n", i);
             fflush(stdout); // Ensure the message is printed immediately
