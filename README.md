@@ -13,7 +13,7 @@ This project has been started for an University Project (Università La Sapienza
 The main goal for this project is to create a way to send ASCII characters from the Host PC to the MCU through Serial Comm, handle it and then send it from the MCU to a TV through VGA. 
 
 This project is based on the following works, researches and websites:
-- VGA timing table http://www.tinyvga.com/vga-timing
+- VGA timing table http://www.tinyvga.com/vga-timing/640x480@60Hz
 - Ben Eater Youtube Video 1 https://youtu.be/l7rce6IQDWs?si=zNHAmS7S074blLvp
 - Ben Eater Youtube VIdeo 2 https://youtu.be/uqY3FMuMuRo?si=dUs1h0dOo-sPSS3M
 - Bitluni Youtube Video 1 https://youtu.be/G70CZLPjsXU?si=ko8MXyLOYsmnInwa
