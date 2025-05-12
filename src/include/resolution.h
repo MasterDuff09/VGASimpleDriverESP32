@@ -2,12 +2,14 @@
 #define H_FRONT_PORCH_FRAMES            8
 #define H_SYNC_PULSE_FRAMES             48
 #define H_BACK_PORCH_FRAMES             24
-#define H_BLANKING_FRAMES               (H_FRONT_PORCH_FRAMES + H_SYNC_PULSE_FRAMES + H_BACK_PORCH_FRAMES)
+
 
 #define V_RES_ACT_FRAMES                480
 #define V_FRONT_PORCH_FRAMES            10
 #define V_SYNC_PULSE_FRAMES             2
 #define V_BACK_PORCH_FRAMES             33
+
+#define H_BLANKING_FRAMES               (H_FRONT_PORCH_FRAMES + H_SYNC_PULSE_FRAMES + H_BACK_PORCH_FRAMES)
 #define V_BLANKING_FRAMES               (V_FRONT_PORCH_FRAMES + V_SYNC_PULSE_FRAMES + V_BACK_PORCH_FRAMES)
 
 #define RGB_RES_BITS                    3
@@ -35,3 +37,6 @@
 #define BLANKING_CHUNK_LEN              V_BLANKING_FRAMES
 #define ACTIVE_SINGLE_CHUNK_SIZE        V_ACTIVE_ROW_TOTAL_BYTES
 #define BLANKING_SINGLE_CHUNK_SIZE      V_BLANKING_ROW_TOTAL_BYTES
+
+#define H_RES                           H_RES_ACT_FRAMES
+#define V_RES                           V_RES_ACT_FRAMES
