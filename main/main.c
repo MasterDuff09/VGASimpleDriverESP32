@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "pattern_handler.h"
+//#include "pattern_handler.h"
 
 /*
 L'idea è di fare un resizing della risoluzione VGA da 640x480 a 320x480.
@@ -23,8 +23,9 @@ Il tutto salvato nell'array allocato nell'heap, per comandare ogni singolo pixel
 void app_main(void){
     
 
-    VGAinit();
+    //VGAinit();
     //VGAprint();
+
     printf("done\n");
     fflush(stdout);
     return;
