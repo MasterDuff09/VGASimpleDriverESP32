@@ -1,6 +1,4 @@
-#include "esp_heap_caps.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+
 #include "resolution.h"
 
 int VGAinit(void);

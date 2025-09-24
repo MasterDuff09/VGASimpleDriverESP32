@@ -1,20 +1,5 @@
-#define H_RES_ACT_FRAMES                320
-#define H_FRONT_PORCH_FRAMES            8
-#define H_SYNC_PULSE_FRAMES             48
-#define H_BACK_PORCH_FRAMES             24
 
 
-#define V_RES_ACT_FRAMES                480
-#define V_FRONT_PORCH_FRAMES            10
-#define V_SYNC_PULSE_FRAMES             2
-#define V_BACK_PORCH_FRAMES             33
-
-#define H_BLANKING_FRAMES               (H_FRONT_PORCH_FRAMES + H_SYNC_PULSE_FRAMES + H_BACK_PORCH_FRAMES)
-#define V_BLANKING_FRAMES               (V_FRONT_PORCH_FRAMES + V_SYNC_PULSE_FRAMES + V_BACK_PORCH_FRAMES)
-
-#define RGB_RES_BITS                    3
-#define H_SYNC_V_SYNC_BITS              2
-#define ACTIVE_BITS                     (RGB_RES_BITS + H_SYNC_V_SYNC_BITS)
 
 #define ROW_ACTIVE_BITS                 (H_RES_ACT_FRAMES * ACTIVE_BITS) // 320 frames * 5 bits (01011 --> 0R, 1G, 0B, 1H, 1V)
 #define ROW_FRONT_PORCH_BITS            (H_FRONT_PORCH_FRAMES * H_SYNC_V_SYNC_BITS) //only H/V-SYNC bits
