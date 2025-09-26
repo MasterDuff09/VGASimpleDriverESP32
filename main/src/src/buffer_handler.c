@@ -1,17 +1,6 @@
 #include "buffer_handler.h"
 
 
-static lldesc_t desc_front, desc_hsync, desc_back, desc_active;
-uint8_t* h_front;
-uint8_t* h_hsync;
-uint8_t* h_back;
-uint8_t* v_front;
-uint8_t* v_hsync;
-uint8_t* v_back;
-uint8_t* lineA;
-uint8_t* lineB;
-
-
 static inline void buffer_init(void){
     
     h_front = heap_caps_malloc(H_FRONT_PORCH_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);

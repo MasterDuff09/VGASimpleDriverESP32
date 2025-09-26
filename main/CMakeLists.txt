@@ -12,7 +12,7 @@
 
 
 idf_component_register(
-    SRC_DIRS      "." "../src/src"
-    INCLUDE_DIRS  "." "../src/include"
+    SRCS     "main.c" "./src/src"
+    INCLUDE_DIRS  "./src/include"
     PRIV_REQUIRES esp_driver_i2s esp_driver_gpio
 )
