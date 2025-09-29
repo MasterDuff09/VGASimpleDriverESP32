@@ -13,19 +13,22 @@
 #include "esp_rom_gpio.h"
 #include "soc/gpio_sig_map.h"
 
-#include "esp_check.h"
+#include "stdint.h"
+#include <stdio.h>
 
 
-#define I2S_PORT        I2S0
+#define I2S_PORT        I2S1
 #define PIXEL_CLK_HZ    12587500
 
 #define PIN_HSYNC       18
-#define PIN_VSYNC       19
+#define PIN_VSYNC       23
 #define PIN_R           27
 #define PIN_G           26
 #define PIN_B           25
 
-#define PIN_CLK         16
+#define PIN_CLK         19
+
+void start_buffer_i2s(void);
 
 
 

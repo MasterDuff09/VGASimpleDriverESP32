@@ -1,23 +1,111 @@
 #include "i2s_handler.h"
+#include "esp_log.h"
 
-static i2s_hal_context_t i2s_c;
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "soc/gpio_struct.h"
 
-static inline void i2s_set_clock(void){
+i2s_hal_context_t i2s_c;
+
+
+void map_data_pins(void){
+    int pins[6] = {PIN_HSYNC, PIN_VSYNC, PIN_R, PIN_G, PIN_B, PIN_CLK};
+
+    
+    gpio_config_t io = {
+        .pin_bit_mask = (1ULL<<pins[0]) | (1ULL<<pins[1]) | (1ULL<<pins[2]) |
+                        (1ULL<<pins[3]) | (1ULL<<pins[4]) | (1ULL<<pins[5]),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_down_en = 0, .pull_up_en = 0, .intr_type = GPIO_INTR_DISABLE
+    };
+    gpio_config(&io);
+
+    
+    
+    esp_rom_gpio_connect_out_signal(PIN_HSYNC, I2S1O_DATA_OUT0_IDX, false, false);
+    //gpio_set_direction(PIN_HSYNC, GPIO_MODE_OUTPUT);
+    //gpio_set_level(PIN_HSYNC, 1);
+    esp_rom_gpio_connect_out_signal(PIN_VSYNC, I2S1O_DATA_OUT1_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(PIN_R,     I2S1O_DATA_OUT2_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(PIN_G,     I2S1O_DATA_OUT3_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(PIN_B,     I2S1O_DATA_OUT4_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(PIN_CLK,   I2S1O_BCK_OUT_IDX,    false, false);
+
+    for (int i=0;i<6;i++) {
+        GPIO.func_out_sel_cfg[pins[i]].oen_sel = 1;
+        GPIO.enable_w1ts = (1U << pins[i]);
+    }
+
+}
+
+void i2s_set_clock(void){
     
     i2s_hal_clock_info_t clk = {
 
         .sclk = 0,
         .mclk = PIXEL_CLK_HZ * 2,
-        .mclk_div = 2
+        .bclk_div = 2
     };
 
     i2s_hal_set_tx_clock(&i2s_c, &clk, I2S_CLK_SRC_APLL, NULL);
 
 }
 
-static void i2s_start(void){
+void i2s_start(void){
     
-    periph_module_enable(PERIPH_I2S0_MODULE);
+    periph_module_enable(PERIPH_I2S1_MODULE);
+
+    i2s_hal_init(&i2s_c, 1);
+
+    i2s_hal_tx_reset(&i2s_c);
+    i2s_hal_tx_reset_fifo(&i2s_c);
+    i2s_hal_tx_reset_dma(&i2s_c);
+
+    i2s_c.dev->conf2.lcd_en = 1;
+    i2s_c.dev->conf2.lcd_tx_wrx2_en = 0;
+    i2s_c.dev->conf2.lcd_tx_sdx2_en = 0;
+
+    i2s_c.dev->sample_rate_conf.tx_bits_mod=8;
+
+
+    //i2s_c.dev->lc_conf.out_eof_mode = 1;
+
+    i2s_c.dev->fifo_conf.tx_fifo_mod_force_en = 1;
+    i2s_c.dev->fifo_conf.tx_fifo_mod = 1;
+    i2s_c.dev->fifo_conf.dscr_en = 1; 
+
+    i2s_c.dev->conf_chan.tx_chan_mod = 1;
+
+    i2s_c.dev->conf.tx_msb_right = 0;
+    i2s_c.dev->conf.tx_right_first = 0;
+    i2s_c.dev->conf.tx_msb_shift = 0;
+    i2s_c.dev->conf.tx_slave_mod = 0;
+
+    i2s_hal_tx_reset_fifo(&i2s_c);
+
+    i2s_hal_tx_enable_dma(&i2s_c);
+    i2s_set_clock();
+
+    i2s_c.dev->out_link.stop  = 0;
+    i2s_c.dev->out_link.addr = (uint32_t)(&desc_front);
+    i2s_c.dev->out_link.start = 1;
+    //i2s_hal_tx_start_link(&i2s_c, (uint32_t)(&desc_front));
+
+    i2s_c.dev->clkm_conf.clka_en=1;
+    i2s_hal_tx_start(&i2s_c);
 
     
+
 }
+
+void start_buffer_i2s(void){
+
+    frame_init();
+    map_data_pins();
+    i2s_start();
+
+
+
+}
+
+

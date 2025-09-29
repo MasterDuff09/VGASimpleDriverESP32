@@ -1,5 +1,6 @@
 // main.c
-#include <stdio.h>
+
+#include "i2s_handler.h"
 
 
 
@@ -7,8 +8,7 @@
 void app_main(void){
 
     printf("start\n");
-
-    printf("done\n");
+    start_buffer_i2s();
     fflush(stdout);
     return;
     

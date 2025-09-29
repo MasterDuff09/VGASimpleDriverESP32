@@ -1,7 +1,17 @@
 #include "buffer_handler.h"
 
+lldesc_t desc_front, desc_hsync, desc_back, desc_active;
+uint8_t* h_front;
+uint8_t* h_hsync;
+uint8_t* h_back;
+uint8_t* v_front;
+uint8_t* v_hsync;
+uint8_t* v_back;
+uint8_t* lineA;
+uint8_t* lineB;
 
-static inline void buffer_init(void){
+
+void buffer_init(void){
     
     h_front = heap_caps_malloc(H_FRONT_PORCH_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
     h_hsync = heap_caps_malloc(H_SYNC_PULSE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
@@ -14,7 +24,7 @@ static inline void buffer_init(void){
     lineB   = heap_caps_malloc(H_ACTIVE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
 }
 
-static inline void fill_costant(void){
+void fill_costant(void){
     int i = 0;
     while (i < H_ACTIVE_FRAMES){
 
@@ -44,7 +54,7 @@ static inline void fill_costant(void){
     }
 }
 
-static inline void lldesc_link(lldesc_t *d, void *buf, int len_bytes, lldesc_t *next){
+void lldesc_link(lldesc_t *d, void *buf, int len_bytes, lldesc_t *next){
 
     d->size   = len_bytes;     
     d->length = len_bytes;     
@@ -56,7 +66,7 @@ static inline void lldesc_link(lldesc_t *d, void *buf, int len_bytes, lldesc_t *
 
 }
 
-static inline void lldesc_init(void){
+void lldesc_init(void){
     
     
     lldesc_link(&desc_front, h_front, H_FRONT_PORCH_FRAMES, &desc_hsync);
