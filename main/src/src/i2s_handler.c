@@ -1,11 +1,8 @@
 #include "i2s_handler.h"
-#include "esp_log.h"
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "soc/gpio_struct.h"
 
 i2s_hal_context_t i2s_c;
+SemaphoreHandle_t line_ready;
 
 
 void map_data_pins(void){
@@ -40,14 +37,27 @@ void map_data_pins(void){
 
 void i2s_set_clock(void){
     
+
+    i2s_c.dev->clkm_conf.clka_en = 0;
+    i2s_c.dev->clkm_conf.clkm_div_a = 1;
+    i2s_c.dev->clkm_conf.clkm_div_b = 0;
+    i2s_c.dev->clkm_conf.clkm_div_num = 5;
+    i2s_c.dev->sample_rate_conf.tx_bck_div_num= 2;
+
+    i2s_hal_tx_reset_fifo(&i2s_c);
+    /*
     i2s_hal_clock_info_t clk = {
 
         .sclk = 0,
-        .mclk = PIXEL_CLK_HZ * 2,
+        .mclk = 200000,//PIXEL_CLK_HZ * 2,//40000000,//
         .bclk_div = 2
     };
 
-    i2s_hal_set_tx_clock(&i2s_c, &clk, I2S_CLK_SRC_APLL, NULL);
+    //i2s_hal_set_tx_clock(&i2s_c, &clk, I2S_CLK_SRC_DEFAULT, NULL);
+    //
+    i2s_hal_set_tx_clock(&i2s_c, &clk, I2S_CLK_SRC_PLL_160M, NULL);
+    i2s_c.dev->clkm_conf.clka_en=0;
+    */
 
 }
 
@@ -81,17 +91,18 @@ void i2s_start(void){
     i2s_c.dev->conf.tx_msb_shift = 0;
     i2s_c.dev->conf.tx_slave_mod = 0;
 
-    i2s_hal_tx_reset_fifo(&i2s_c);
-
-    i2s_hal_tx_enable_dma(&i2s_c);
+    //i2s_hal_tx_reset_fifo(&i2s_c);
     i2s_set_clock();
+    i2s_hal_tx_enable_dma(&i2s_c);
+    
 
     i2s_c.dev->out_link.stop  = 0;
     i2s_c.dev->out_link.addr = (uint32_t)(&desc_front);
     i2s_c.dev->out_link.start = 1;
     //i2s_hal_tx_start_link(&i2s_c, (uint32_t)(&desc_front));
 
-    i2s_c.dev->clkm_conf.clka_en=1;
+    //i2s_c.dev->clkm_conf.clka_en = 0;
+
     i2s_hal_tx_start(&i2s_c);
 
     
@@ -103,9 +114,11 @@ void start_buffer_i2s(void){
     frame_init();
     map_data_pins();
     i2s_start();
-
-
-
+    ESP_LOGI("i2s","clkm_div_num=%u, bclk_div=%u, a=%u, b=%u",
+         i2s_c.dev->clkm_conf.clkm_div_num,
+         i2s_c.dev->sample_rate_conf.tx_bck_div_num,
+         i2s_c.dev->clkm_conf.clkm_div_a,
+         i2s_c.dev->clkm_conf.clkm_div_b);
 }
 
 

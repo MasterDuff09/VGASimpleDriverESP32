@@ -1,5 +1,9 @@
 #include "buffer_handler.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+
 #include "esp_private/periph_ctrl.h"
 #include "hal/hal_utils.h"
 #include "soc/clk_tree_defs.h"
@@ -12,6 +16,11 @@
 #include "driver/gpio.h"
 #include "esp_rom_gpio.h"
 #include "soc/gpio_sig_map.h"
+
+#include "esp_log.h"
+
+
+#include "soc/gpio_struct.h"
 
 #include "stdint.h"
 #include <stdio.h>
@@ -29,6 +38,8 @@
 #define PIN_CLK         19
 
 void start_buffer_i2s(void);
+
+extern SemaphoreHandle_t line_ready;
 
 
 
