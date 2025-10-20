@@ -36,28 +36,26 @@ void map_data_pins(void){
 }
 
 void i2s_set_clock(void){
-    
 
-    i2s_c.dev->clkm_conf.clka_en = 0;
+    rtc_clk_apll_enable(true);
+    uint32_t div = 0, sdm0 = 0, sdm1 = 0, sdm2 = 0;
+    
+    int freq = rtc_clk_apll_coeff_calc(PIXEL_CLK_HZ*2, &div, &sdm0, &sdm1, &sdm2);
+    ESP_LOGI("apll", "freq=%u, div=%u, sdm0=%u, sdm1=%u, sdm2=%u", freq, div, sdm0, sdm1, sdm2);
+    rtc_clk_apll_coeff_set(div, sdm0, sdm1, sdm2);
+
+    i2s_c.dev->clkm_conf.clka_en = 1;
+
     i2s_c.dev->clkm_conf.clkm_div_a = 1;
     i2s_c.dev->clkm_conf.clkm_div_b = 0;
-    i2s_c.dev->clkm_conf.clkm_div_num = 5;
-    i2s_c.dev->sample_rate_conf.tx_bck_div_num= 2;
+    i2s_c.dev->clkm_conf.clkm_div_num = 2;
+    i2s_c.dev->sample_rate_conf.tx_bck_div_num= 1;
 
+    
     i2s_hal_tx_reset_fifo(&i2s_c);
-    /*
-    i2s_hal_clock_info_t clk = {
-
-        .sclk = 0,
-        .mclk = 200000,//PIXEL_CLK_HZ * 2,//40000000,//
-        .bclk_div = 2
-    };
-
-    //i2s_hal_set_tx_clock(&i2s_c, &clk, I2S_CLK_SRC_DEFAULT, NULL);
     //
-    i2s_hal_set_tx_clock(&i2s_c, &clk, I2S_CLK_SRC_PLL_160M, NULL);
-    i2s_c.dev->clkm_conf.clka_en=0;
-    */
+    
+    
 
 }
 
@@ -101,7 +99,7 @@ void i2s_start(void){
     i2s_c.dev->out_link.start = 1;
     //i2s_hal_tx_start_link(&i2s_c, (uint32_t)(&desc_front));
 
-    //i2s_c.dev->clkm_conf.clka_en = 0;
+    i2s_c.dev->clkm_conf.clka_en = 1;
 
     i2s_hal_tx_start(&i2s_c);
 
@@ -114,6 +112,7 @@ void start_buffer_i2s(void){
     frame_init();
     map_data_pins();
     i2s_start();
+    //vTaskDelay(3000/ portTICK_PERIOD_MS);
     ESP_LOGI("i2s","clkm_div_num=%u, bclk_div=%u, a=%u, b=%u",
          i2s_c.dev->clkm_conf.clkm_div_num,
          i2s_c.dev->sample_rate_conf.tx_bck_div_num,

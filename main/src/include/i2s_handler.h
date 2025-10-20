@@ -5,22 +5,27 @@
 #include "freertos/semphr.h"
 
 #include "esp_private/periph_ctrl.h"
-#include "hal/hal_utils.h"
+#include "esp_private/rtc_clk.h"
+#include "soc/rtc.h"
 #include "soc/clk_tree_defs.h"
+
+#include "hal/hal_utils.h"
+#include "soc/soc.h"
+#include "hal/regi2c_ctrl.h"
+
 
 #include "hal/i2s_hal.h"
 #include "hal/i2s_types.h"
 #include "soc/i2s_periph.h"
 #include "soc/i2s_struct.h"
+#include "soc/i2s_reg.h"
 
 #include "driver/gpio.h"
 #include "esp_rom_gpio.h"
 #include "soc/gpio_sig_map.h"
+#include "soc/gpio_struct.h"
 
 #include "esp_log.h"
-
-
-#include "soc/gpio_struct.h"
 
 #include "stdint.h"
 #include <stdio.h>
