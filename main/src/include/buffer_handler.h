@@ -27,7 +27,8 @@
 #define H_LOW_V_HIGH    0b00000010
 #define H_HIGH_V_HIGH   0b00000011
 
-extern lldesc_t desc_front, desc_hsync, desc_back, desc_active;
+extern lldesc_t desc_frontA, desc_hsyncA, desc_backA, desc_activeA;
+extern lldesc_t desc_frontB, desc_hsyncB, desc_backB, desc_activeB;
 extern uint8_t* h_front;
 extern uint8_t* h_hsync;
 extern uint8_t* h_back;
@@ -36,7 +37,7 @@ extern uint8_t* v_hsync;
 extern uint8_t* v_back;
 extern uint8_t* lineA;
 extern uint8_t* lineB;
-extern volatile uint8_t *tx_next;
+//extern volatile uint8_t *tx_next;
 extern volatile uint8_t *fill_next;
 
 

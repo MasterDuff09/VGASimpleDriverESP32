@@ -35,12 +35,12 @@
 #define PIXEL_CLK_HZ    12587500 * 2
 
 #define PIN_HSYNC       18
-#define PIN_VSYNC       23
+#define PIN_VSYNC       19
 #define PIN_R           27
 #define PIN_G           26
 #define PIN_B           25
 
-#define PIN_CLK         19
+#define PIN_CLK         23
 
 void init_sem(void);
 //void i2s_enable_interrupts(void);
@@ -52,8 +52,8 @@ void i2s_start();
 
 
 extern SemaphoreHandle_t line_ready;
-
-extern uint16_t current_y_line;
+extern volatile bool last_eof_A;
+extern volatile uint16_t current_y_line;
 
 
 

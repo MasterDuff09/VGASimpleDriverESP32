@@ -1,6 +1,7 @@
 #include "buffer_handler.h"
 
-lldesc_t desc_front, desc_hsync, desc_back, desc_active;
+lldesc_t desc_frontA, desc_hsyncA, desc_backA, desc_activeA;
+lldesc_t desc_frontB, desc_hsyncB, desc_backB, desc_activeB;
 uint8_t* h_front;
 uint8_t* h_hsync;
 uint8_t* h_back;
@@ -9,7 +10,7 @@ uint8_t* v_hsync;
 uint8_t* v_back;
 uint8_t* lineA;
 uint8_t* lineB;
-volatile uint8_t* tx_next = NULL;
+//volatile uint8_t* tx_next = NULL;
 volatile uint8_t* fill_next = NULL;
 
 
@@ -72,14 +73,21 @@ static void lldesc_link(lldesc_t *d, void *buf, int len_bytes, lldesc_t *next){
 static void lldesc_init(void){
     
     
-    lldesc_link(&desc_front, h_front, H_FRONT_PORCH_FRAMES, &desc_hsync);
-    lldesc_link(&desc_hsync, h_hsync, H_SYNC_PULSE_FRAMES,  &desc_back);
-    lldesc_link(&desc_back, h_back, H_BACK_PORCH_FRAMES, &desc_active);
-    lldesc_link(&desc_active, lineA, H_ACTIVE_FRAMES, &desc_front);
-    desc_active.eof=1;
+    lldesc_link(&desc_frontA, h_front, H_FRONT_PORCH_FRAMES, &desc_hsyncA);
+    lldesc_link(&desc_hsyncA, h_hsync, H_SYNC_PULSE_FRAMES,  &desc_backA);
+    lldesc_link(&desc_backA, h_back, H_BACK_PORCH_FRAMES, &desc_activeA);
+    lldesc_link(&desc_activeA, lineA, H_ACTIVE_FRAMES, &desc_frontB);
+    desc_activeA.eof=1;
 
-    tx_next = lineA;
-    fill_next = lineB;
+    lldesc_link(&desc_frontB, h_front, H_FRONT_PORCH_FRAMES, &desc_hsyncB);
+    lldesc_link(&desc_hsyncB, h_hsync, H_SYNC_PULSE_FRAMES,  &desc_backB);
+    lldesc_link(&desc_backB, h_back, H_BACK_PORCH_FRAMES, &desc_activeB);
+    lldesc_link(&desc_activeB, lineA, H_ACTIVE_FRAMES, &desc_frontA);
+
+    desc_activeB.eof=1;
+
+    //tx_next = lineA;
+    fill_next = lineA;
 
 }
 

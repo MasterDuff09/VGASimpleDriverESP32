@@ -9,14 +9,17 @@ static inline bool is_visible(uint16_t y){
     return (y < V_ACTIVE_FRAMES);
 }
 
+static uint16_t last_delay = 0;
+
 void main_vga_task(void *arg){
 
     while (true){
         xSemaphoreTake(line_ready, portMAX_DELAY);
 
-        uint16_t next_line_tx = (current_y_line + 1) % 525;
-        uint16_t next_line_fill = (current_y_line + 2) % 525;
+        //uint16_t next_line = (current_y_line + 1) % 525;
+        uint16_t next_line_2 = (current_y_line + 1) % 525;
 
+        /*
         if (is_vsync(next_line_tx)) {
             desc_front.buf = v_front;
             desc_hsync.buf = v_hsync;
@@ -26,17 +29,57 @@ void main_vga_task(void *arg){
             desc_hsync.buf = h_hsync;
             desc_back.buf = h_back;
         }
+        */
 
+        if (last_eof_A){
+            
+            if (is_vsync(next_line_2)){
+
+                desc_frontA.buf = v_front;
+                desc_hsyncA.buf = v_hsync;
+                desc_backA.buf  = v_back;
+
+            }   else    {
+
+                desc_frontA.buf = h_front;
+                desc_hsyncA.buf = h_hsync;
+                desc_backA.buf  = h_back;
+
+            }
+
+        }   else    {
+
+            if (is_vsync(next_line_2)){
+
+                desc_frontB.buf = v_front;
+                desc_hsyncB.buf = v_hsync;
+                desc_backB.buf  = v_back;
+
+            }   else    {
+
+                desc_frontB.buf = h_front;
+                desc_hsyncB.buf = h_hsync;
+                desc_backB.buf  = h_back;
+
+            }
+
+        }
+        
         uint8_t *dest = (uint8_t*) fill_next;
 
-        if (is_visible(next_line_fill)){
+        if (is_visible(next_line_2)){
 
             //render_char(next_line_fill, dst);
 
         } else {
 
-            if (is_vsync(next_line_fill))   memset(dest, H_HIGH_V_LOW, H_ACTIVE_FRAMES);
-            else memset(dest, H_HIGH_V_HIGH, V_ACTIVE_FRAMES);
+            memset(dest, is_vsync(next_line_2)? H_HIGH_V_LOW : H_HIGH_V_HIGH, H_ACTIVE_FRAMES);
+
+        }
+
+        if (++last_delay >= 512){
+            last_delay = 0;
+            vTaskDelay(0);
         }
 
     }
@@ -48,5 +91,5 @@ void vga_start(void){
     start_buffer_i2s();
     i2s_start();
     
-    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 8, NULL, 0);
+    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 8, NULL, 1);
 }

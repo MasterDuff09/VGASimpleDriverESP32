@@ -5,8 +5,8 @@ i2s_hal_context_t i2s_c;
 
 SemaphoreHandle_t line_ready;
 intr_handle_t i2s_isr_handle;
-
-uint16_t current_y_line = 0;
+volatile bool last_eof_A = false;
+volatile uint16_t current_y_line = 0;
 
 
 /******   I2S HANDLER TO BUFFER   *******/
@@ -17,11 +17,12 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
 
     if (st & I2S_OUT_EOF_INT_ST_M){
 
-        uint8_t *just_used = (uint8_t*) desc_active.buf;
-        uint8_t *other = (just_used == lineA) ? lineB : lineA;
+        lldesc_t *eof_desc = (lldesc_t*) i2s_c.dev->out_eof_des_addr;
+        last_eof_A = (eof_desc == &desc_activeA);
 
-        desc_active.buf = other;
-        tx_next = other;
+        uint8_t *just_used = (uint8_t*) (last_eof_A? desc_activeA.buf : desc_activeB.buf);
+
+        //tx_next = other;
         fill_next = just_used;
 
         current_y_line = (current_y_line + 1) % 525;
@@ -167,7 +168,7 @@ void i2s_start(void){
     
 
     i2s_c.dev->out_link.stop  = 0;
-    i2s_c.dev->out_link.addr = (uint32_t)(&desc_front);
+    i2s_c.dev->out_link.addr = (uint32_t)(&desc_frontA);
     i2s_c.dev->out_link.start = 1;
 
     i2s_c.dev->clkm_conf.clka_en = 1;
