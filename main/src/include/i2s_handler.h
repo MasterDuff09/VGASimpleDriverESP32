@@ -44,7 +44,7 @@
 
 void init_sem(void);
 //void i2s_enable_interrupts(void);
-void IRAM_ATTR i2s_tx_isr(void *arg);
+//void IRAM_ATTR i2s_tx_isr(void *arg);
 //void map_data_pins(void);
 //void i2s_set_clock(void);
 void start_buffer_i2s(void);

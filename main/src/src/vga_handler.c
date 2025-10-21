@@ -6,7 +6,7 @@ static inline bool is_vsync(uint16_t y){
 }
 
 static inline bool is_visible(uint16_t y){
-    return (y >= 0) && (y < V_ACTIVE_FRAMES);
+    return (y < V_ACTIVE_FRAMES);
 }
 
 void main_vga_task(void *arg){
