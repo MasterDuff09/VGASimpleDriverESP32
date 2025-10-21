@@ -2,10 +2,81 @@
 
 
 i2s_hal_context_t i2s_c;
+
 SemaphoreHandle_t line_ready;
+intr_handle_t i2s_isr_handle;
+
+uint16_t current_y_line = 0;
 
 
-void map_data_pins(void){
+/******   I2S HANDLER TO BUFFER   *******/
+
+void IRAM_ATTR i2s_tx_isr(void *arg){
+    
+    uint32_t st = i2s_c.dev->int_st.val;
+
+    if (st & I2S_OUT_EOF_INT_ST_M){
+
+        uint8_t *just_used = (uint8_t*) desc_active.buf;
+        uint8_t *other = (just_used == lineA) ? lineB : lineA;
+
+        desc_active.buf = other;
+        tx_next = other;
+        fill_next = just_used;
+
+        current_y_line = (current_y_line + 1) % 525;
+
+        BaseType_t hpw = pdFALSE;
+        xSemaphoreGiveFromISR(line_ready, &hpw);
+        if (hpw) portYIELD_FROM_ISR();
+        
+        i2s_c.dev->int_clr.out_eof = 1;
+
+    }
+
+    if (st & I2S_OUT_DSCR_ERR_INT_ST_M) {
+
+        //isr_flags |= 0x1;
+        i2s_c.dev->int_clr.out_dscr_err = 1;
+
+    }
+
+    if (st & I2S_OUT_TOTAL_EOF_INT_ST_M) {
+
+        //isr_flags |= 0x4;
+        i2s_c.dev->int_clr.out_total_eof = 1;
+
+    }
+
+}
+
+
+
+void i2s_enable_interrupts(void){
+
+    i2s_c.dev->int_clr.val = 0xFFFFFFFF;
+    i2s_c.dev->int_ena.val = 0;
+    i2s_c.dev->int_ena.out_eof = 1;
+    i2s_c.dev->int_ena.out_dscr_err = 1;
+    i2s_c.dev->int_ena.out_total_eof = 1;
+    i2s_c.dev->lc_conf.out_eof_mode = 1;
+
+    ESP_ERROR_CHECK(esp_intr_alloc(ETS_I2S1_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL1, i2s_tx_isr, NULL, &i2s_isr_handle));
+
+}
+
+
+
+void init_sem(void){
+
+    line_ready = xSemaphoreCreateCounting(2, 0);
+    configASSERT(line_ready);
+
+}
+
+
+/******   I2S HANDLER TO VGA   *******/
+static void map_data_pins(void){
     int pins[6] = {PIN_HSYNC, PIN_VSYNC, PIN_R, PIN_G, PIN_B, PIN_CLK};
 
     
@@ -35,20 +106,20 @@ void map_data_pins(void){
 
 }
 
-void i2s_set_clock(void){
+static void i2s_set_clock(void){
 
     rtc_clk_apll_enable(true);
     uint32_t div = 0, sdm0 = 0, sdm1 = 0, sdm2 = 0;
     
-    int freq = rtc_clk_apll_coeff_calc(PIXEL_CLK_HZ, &div, &sdm0, &sdm1, &sdm2);
-    ESP_LOGI("apll", "freq=%u, div=%u, sdm0=%u, sdm1=%u, sdm2=%u", freq, div, sdm0, sdm1, sdm2);
+    int freq = rtc_clk_apll_coeff_calc(PIXEL_CLK_HZ * 2, &div, &sdm0, &sdm1, &sdm2);
+    //ESP_LOGI("apll", "freq=%u, div=%u, sdm0=%u, sdm1=%u, sdm2=%u", freq, div, sdm0, sdm1, sdm2);
     rtc_clk_apll_coeff_set(div, sdm0, sdm1, sdm2);
 
     i2s_c.dev->clkm_conf.clka_en = 1;
 
     i2s_c.dev->clkm_conf.clkm_div_a = 1;
     i2s_c.dev->clkm_conf.clkm_div_b = 0;
-    i2s_c.dev->clkm_conf.clkm_div_num = 1;
+    i2s_c.dev->clkm_conf.clkm_div_num = 2;
     i2s_c.dev->sample_rate_conf.tx_bck_div_num= 1;
 
     
@@ -60,6 +131,8 @@ void i2s_set_clock(void){
 }
 
 void i2s_start(void){
+
+    map_data_pins();
     
     periph_module_enable(PERIPH_I2S1_MODULE);
 
@@ -75,9 +148,6 @@ void i2s_start(void){
 
     i2s_c.dev->sample_rate_conf.tx_bits_mod=8;
 
-
-    //i2s_c.dev->lc_conf.out_eof_mode = 1;
-
     i2s_c.dev->fifo_conf.tx_fifo_mod_force_en = 1;
     i2s_c.dev->fifo_conf.tx_fifo_mod = 1;
     i2s_c.dev->fifo_conf.dscr_en = 1; 
@@ -89,15 +159,16 @@ void i2s_start(void){
     i2s_c.dev->conf.tx_msb_shift = 0;
     i2s_c.dev->conf.tx_slave_mod = 0;
 
-    //i2s_hal_tx_reset_fifo(&i2s_c);
     i2s_set_clock();
+
+    i2s_enable_interrupts();
+    
     i2s_hal_tx_enable_dma(&i2s_c);
     
 
     i2s_c.dev->out_link.stop  = 0;
     i2s_c.dev->out_link.addr = (uint32_t)(&desc_front);
     i2s_c.dev->out_link.start = 1;
-    //i2s_hal_tx_start_link(&i2s_c, (uint32_t)(&desc_front));
 
     i2s_c.dev->clkm_conf.clka_en = 1;
 
@@ -110,14 +181,16 @@ void i2s_start(void){
 void start_buffer_i2s(void){
 
     frame_init();
-    map_data_pins();
-    i2s_start();
     //vTaskDelay(3000/ portTICK_PERIOD_MS);
+    /*
     ESP_LOGI("i2s","clkm_div_num=%u, bclk_div=%u, a=%u, b=%u",
          i2s_c.dev->clkm_conf.clkm_div_num,
          i2s_c.dev->sample_rate_conf.tx_bck_div_num,
          i2s_c.dev->clkm_conf.clkm_div_a,
          i2s_c.dev->clkm_conf.clkm_div_b);
+    */
 }
+
+
 
 

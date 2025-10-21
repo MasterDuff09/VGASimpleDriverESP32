@@ -36,6 +36,9 @@ extern uint8_t* v_hsync;
 extern uint8_t* v_back;
 extern uint8_t* lineA;
 extern uint8_t* lineB;
+extern volatile uint8_t *tx_next;
+extern volatile uint8_t *fill_next;
+
 
 void frame_init(void);
 

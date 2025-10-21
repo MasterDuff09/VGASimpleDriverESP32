@@ -9,9 +9,12 @@ uint8_t* v_hsync;
 uint8_t* v_back;
 uint8_t* lineA;
 uint8_t* lineB;
+uint8_t* tx_next = NULL;
+uint8_t* fill_next = NULL;
 
 
-void buffer_init(void){
+
+static void buffer_init(void){
     
     h_front = heap_caps_malloc(H_FRONT_PORCH_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
     h_hsync = heap_caps_malloc(H_SYNC_PULSE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
@@ -54,7 +57,7 @@ void fill_costant(void){
     }
 }
 
-void lldesc_link(lldesc_t *d, void *buf, int len_bytes, lldesc_t *next){
+static void lldesc_link(lldesc_t *d, void *buf, int len_bytes, lldesc_t *next){
 
     d->size   = len_bytes;     
     d->length = len_bytes;     
@@ -66,7 +69,7 @@ void lldesc_link(lldesc_t *d, void *buf, int len_bytes, lldesc_t *next){
 
 }
 
-void lldesc_init(void){
+static void lldesc_init(void){
     
     
     lldesc_link(&desc_front, h_front, H_FRONT_PORCH_FRAMES, &desc_hsync);
@@ -74,6 +77,9 @@ void lldesc_init(void){
     lldesc_link(&desc_back, h_back, H_BACK_PORCH_FRAMES, &desc_active);
     lldesc_link(&desc_active, lineA, H_ACTIVE_FRAMES, &desc_front);
     desc_active.eof=1;
+
+    tx_next = lineA;
+    fill_next = lineB;
 
 }
 
