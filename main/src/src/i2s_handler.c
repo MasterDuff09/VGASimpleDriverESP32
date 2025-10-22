@@ -117,12 +117,12 @@ void init_sem(void){
 
 /******   I2S HANDLER TO VGA   *******/
 static void map_data_pins(void){
-    int pins[6] = {PIN_HSYNC, PIN_VSYNC, PIN_R, PIN_G, PIN_B, PIN_CLK};
+    int pins[5] = {PIN_HSYNC, PIN_VSYNC, PIN_R, PIN_G, PIN_B};
 
     
     gpio_config_t io = {
         .pin_bit_mask = (1ULL<<pins[0]) | (1ULL<<pins[1]) | (1ULL<<pins[2]) |
-                        (1ULL<<pins[3]) | (1ULL<<pins[4]) | (1ULL<<pins[5]),
+                        (1ULL<<pins[3]) | (1ULL<<pins[4]),
         .mode = GPIO_MODE_OUTPUT,
         .pull_down_en = 0, .pull_up_en = 0, .intr_type = GPIO_INTR_DISABLE
     };
@@ -137,9 +137,9 @@ static void map_data_pins(void){
     esp_rom_gpio_connect_out_signal(PIN_R,     I2S1O_DATA_OUT2_IDX, false, false);
     esp_rom_gpio_connect_out_signal(PIN_G,     I2S1O_DATA_OUT3_IDX, false, false);
     esp_rom_gpio_connect_out_signal(PIN_B,     I2S1O_DATA_OUT4_IDX, false, false);
-    esp_rom_gpio_connect_out_signal(PIN_CLK,   I2S1O_BCK_OUT_IDX,    false, false);
+    //esp_rom_gpio_connect_out_signal(PIN_CLK,   I2S1O_BCK_OUT_IDX,    false, false);
 
-    for (int i=0;i<6;i++) {
+    for (int i=0;i<5;i++) {
         GPIO.func_out_sel_cfg[pins[i]].oen_sel = 1;
         GPIO.enable_w1ts = (1U << pins[i]);
     }
@@ -151,7 +151,7 @@ static void i2s_set_clock(void){
     rtc_clk_apll_enable(true);
     uint32_t div = 0, sdm0 = 0, sdm1 = 0, sdm2 = 0;
     
-    int freq = rtc_clk_apll_coeff_calc(PIXEL_CLK_HZ * 2, &div, &sdm0, &sdm1, &sdm2);
+    int freq = rtc_clk_apll_coeff_calc(PIXEL_CLK_HZ * 3, &div, &sdm0, &sdm1, &sdm2);
     ESP_LOGI("apll", "freq=%u, div=%u, sdm0=%u, sdm1=%u, sdm2=%u", freq, div, sdm0, sdm1, sdm2);
     rtc_clk_apll_coeff_set(div, sdm0, sdm1, sdm2);
 
@@ -159,7 +159,7 @@ static void i2s_set_clock(void){
 
     i2s_c.dev->clkm_conf.clkm_div_a = 1;
     i2s_c.dev->clkm_conf.clkm_div_b = 0;
-    i2s_c.dev->clkm_conf.clkm_div_num = 2;
+    i2s_c.dev->clkm_conf.clkm_div_num = 3;
     i2s_c.dev->sample_rate_conf.tx_bck_div_num= 1;
 
     

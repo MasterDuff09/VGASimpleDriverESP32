@@ -45,12 +45,12 @@ void main_vga_task(void *arg){
             memcpy(dest, is_vsync(next_line_2)? black_lineL : black_lineH, H_ACTIVE_FRAMES);
 
         }
-
+        
         if (++last_delay >= 512){
             last_delay = 0;
             vTaskDelay(0);
         }
-
+        
     }
 }
 
