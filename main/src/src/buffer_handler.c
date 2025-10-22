@@ -82,7 +82,7 @@ static void lldesc_init(void){
     lldesc_link(&desc_frontB, h_front, H_FRONT_PORCH_FRAMES, &desc_hsyncB);
     lldesc_link(&desc_hsyncB, h_hsync, H_SYNC_PULSE_FRAMES,  &desc_backB);
     lldesc_link(&desc_backB, h_back, H_BACK_PORCH_FRAMES, &desc_activeB);
-    lldesc_link(&desc_activeB, lineA, H_ACTIVE_FRAMES, &desc_frontA);
+    lldesc_link(&desc_activeB, lineB, H_ACTIVE_FRAMES, &desc_frontA);
 
     desc_activeB.eof=1;
 

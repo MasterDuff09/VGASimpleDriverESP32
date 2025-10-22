@@ -8,6 +8,10 @@ intr_handle_t i2s_isr_handle;
 volatile bool last_eof_A = false;
 volatile uint16_t current_y_line = 0;
 
+static inline bool is_vsync(uint16_t y){
+    return (y >= (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES)) && (y < (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_SYNC_PULSE_FRAMES));
+}
+
 
 /******   I2S HANDLER TO BUFFER   *******/
 
@@ -26,6 +30,42 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
         fill_next = just_used;
 
         current_y_line = (current_y_line + 1) % 525;
+
+        if (last_eof_A){
+            
+            if (is_vsync(current_y_line)){
+
+                desc_frontA.buf = v_front;
+                desc_hsyncA.buf = v_hsync;
+                desc_backA.buf  = v_back;
+
+            }   else    {
+
+                desc_frontA.buf = h_front;
+                desc_hsyncA.buf = h_hsync;
+                desc_backA.buf  = h_back;
+
+            }
+
+        }   else    {
+
+            if (is_vsync(current_y_line)){
+
+                desc_frontB.buf = v_front;
+                desc_hsyncB.buf = v_hsync;
+                desc_backB.buf  = v_back;
+
+            }   else    {
+
+                desc_frontB.buf = h_front;
+                desc_hsyncB.buf = h_hsync;
+                desc_backB.buf  = h_back;
+
+            }
+
+        }
+
+        __asm__ __volatile__ ("" ::: "memory");
 
         BaseType_t hpw = pdFALSE;
         xSemaphoreGiveFromISR(line_ready, &hpw);
@@ -70,7 +110,7 @@ void i2s_enable_interrupts(void){
 
 void init_sem(void){
 
-    line_ready = xSemaphoreCreateCounting(2, 0);
+    line_ready = xSemaphoreCreateCounting(4, 0);
     configASSERT(line_ready);
 
 }

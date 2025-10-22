@@ -1,13 +1,13 @@
 #include "vga_handler.h"
 
-static inline bool is_vsync(uint16_t y){
-    return (y >= (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES)) &&
-                (y < V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_SYNC_PULSE_FRAMES);
-}
-
 static inline bool is_visible(uint16_t y){
     return (y < V_ACTIVE_FRAMES);
 }
+
+static inline bool is_vsync(uint16_t y){
+    return (y >= (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES)) && (y < (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_SYNC_PULSE_FRAMES));
+}
+
 
 static uint16_t last_delay = 0;
 
@@ -31,39 +31,7 @@ void main_vga_task(void *arg){
         }
         */
 
-        if (last_eof_A){
-            
-            if (is_vsync(next_line_2)){
-
-                desc_frontA.buf = v_front;
-                desc_hsyncA.buf = v_hsync;
-                desc_backA.buf  = v_back;
-
-            }   else    {
-
-                desc_frontA.buf = h_front;
-                desc_hsyncA.buf = h_hsync;
-                desc_backA.buf  = h_back;
-
-            }
-
-        }   else    {
-
-            if (is_vsync(next_line_2)){
-
-                desc_frontB.buf = v_front;
-                desc_hsyncB.buf = v_hsync;
-                desc_backB.buf  = v_back;
-
-            }   else    {
-
-                desc_frontB.buf = h_front;
-                desc_hsyncB.buf = h_hsync;
-                desc_backB.buf  = h_back;
-
-            }
-
-        }
+        
         
         uint8_t *dest = (uint8_t*) fill_next;
 
@@ -91,5 +59,5 @@ void vga_start(void){
     start_buffer_i2s();
     i2s_start();
     
-    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 8, NULL, 1);
+    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 1);
 }
