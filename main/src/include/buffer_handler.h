@@ -15,6 +15,7 @@
 #define V_FRONT_PORCH_FRAMES            10
 #define V_SYNC_PULSE_FRAMES             2
 #define V_BACK_PORCH_FRAMES             33
+#define TOTAL_V_FRAMES                  (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_BACK_PORCH_FRAMES + V_SYNC_PULSE_FRAMES)
 
 #define RGB_RES_BITS                    3
 #define H_SYNC_V_SYNC_BITS              2
@@ -37,6 +38,8 @@ extern uint8_t* v_hsync;
 extern uint8_t* v_back;
 extern uint8_t* lineA;
 extern uint8_t* lineB;
+extern uint8_t* black_lineH;
+extern uint8_t* black_lineL;
 //extern volatile uint8_t *tx_next;
 extern volatile uint8_t *fill_next;
 

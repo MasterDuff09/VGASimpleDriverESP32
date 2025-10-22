@@ -10,6 +10,9 @@ uint8_t* v_hsync;
 uint8_t* v_back;
 uint8_t* lineA;
 uint8_t* lineB;
+uint8_t* black_lineH;
+uint8_t* black_lineL;
+
 //volatile uint8_t* tx_next = NULL;
 volatile uint8_t* fill_next = NULL;
 
@@ -26,6 +29,8 @@ static void buffer_init(void){
 
     lineA   = heap_caps_malloc(H_ACTIVE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
     lineB   = heap_caps_malloc(H_ACTIVE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+    black_lineH = heap_caps_malloc(H_ACTIVE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+    black_lineL = heap_caps_malloc(H_ACTIVE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
 }
 
 void fill_costant(void){
@@ -34,6 +39,8 @@ void fill_costant(void){
 
         lineA[i] = H_HIGH_V_HIGH;
         lineB[i] = H_HIGH_V_HIGH;
+        black_lineH[i] = H_HIGH_V_HIGH;
+        black_lineL[i] = H_HIGH_V_LOW;
 
         if (i < H_SYNC_PULSE_FRAMES){
 

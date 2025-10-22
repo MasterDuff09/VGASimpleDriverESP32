@@ -29,7 +29,7 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
         //tx_next = other;
         fill_next = just_used;
 
-        current_y_line = (current_y_line + 1) % 525;
+        current_y_line = (current_y_line + 1) % TOTAL_V_FRAMES;
 
         if (last_eof_A){
             
@@ -112,7 +112,6 @@ void init_sem(void){
 
     line_ready = xSemaphoreCreateCounting(4, 0);
     configASSERT(line_ready);
-
 }
 
 
@@ -153,7 +152,7 @@ static void i2s_set_clock(void){
     uint32_t div = 0, sdm0 = 0, sdm1 = 0, sdm2 = 0;
     
     int freq = rtc_clk_apll_coeff_calc(PIXEL_CLK_HZ * 2, &div, &sdm0, &sdm1, &sdm2);
-    //ESP_LOGI("apll", "freq=%u, div=%u, sdm0=%u, sdm1=%u, sdm2=%u", freq, div, sdm0, sdm1, sdm2);
+    ESP_LOGI("apll", "freq=%u, div=%u, sdm0=%u, sdm1=%u, sdm2=%u", freq, div, sdm0, sdm1, sdm2);
     rtc_clk_apll_coeff_set(div, sdm0, sdm1, sdm2);
 
     i2s_c.dev->clkm_conf.clka_en = 1;

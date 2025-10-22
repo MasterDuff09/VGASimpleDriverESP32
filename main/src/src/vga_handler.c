@@ -17,7 +17,7 @@ void main_vga_task(void *arg){
         xSemaphoreTake(line_ready, portMAX_DELAY);
 
         //uint16_t next_line = (current_y_line + 1) % 525;
-        uint16_t next_line_2 = (current_y_line + 1) % 525;
+        uint16_t next_line_2 = (current_y_line + 1) % TOTAL_V_FRAMES;
 
         /*
         if (is_vsync(next_line_tx)) {
@@ -41,7 +41,8 @@ void main_vga_task(void *arg){
 
         } else {
 
-            memset(dest, is_vsync(next_line_2)? H_HIGH_V_LOW : H_HIGH_V_HIGH, H_ACTIVE_FRAMES);
+            //memset(dest, is_vsync(next_line_2)? H_HIGH_V_LOW : H_HIGH_V_HIGH, H_ACTIVE_FRAMES);
+            memcpy(dest, is_vsync(next_line_2)? black_lineL : black_lineH, H_ACTIVE_FRAMES);
 
         }
 
