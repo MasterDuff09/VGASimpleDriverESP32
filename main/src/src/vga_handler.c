@@ -1,5 +1,9 @@
 #include "vga_handler.h"
 
+static uint16_t last_delay = 0;
+
+static uint8_t ch_lut[TOTAL_CH][CHAR_H][CHAR_W] __attribute__((aligned(4)));
+
 static inline bool is_visible(uint16_t y){
     return (y < V_ACTIVE_FRAMES);
 }
@@ -8,8 +12,20 @@ static inline bool is_vsync(uint16_t y){
     return (y >= (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES)) && (y < (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_SYNC_PULSE_FRAMES));
 }
 
+static void build_lut(void){
+    for (int ci = 0; ci < TOTAL_CH; ++ci){
+        for(int cy = 0; cy < CHAR_H; ++cy){
+            for(int cx = 0; cx < CHAR_W, ++cx){
+                ch_lut[ci][cy][cx] = Font8x8Pixels[(ci*CHAR_H + cy)*CHAR_W + cx];
+            }
+        }
+    }
+}
 
-static uint16_t last_delay = 0;
+
+
+
+
 
 void main_vga_task(void *arg){
 
