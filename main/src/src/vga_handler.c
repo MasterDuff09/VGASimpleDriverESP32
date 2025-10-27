@@ -1,6 +1,7 @@
 #include "vga_handler.h"
 
 static uint16_t last_delay = 0;
+uint16_t last_y = 0;
 
 static uint8_t ch_lut[TOTAL_CH][CHAR_H][CHAR_W] __attribute__((aligned(4)));
 
@@ -15,16 +16,12 @@ static inline bool is_vsync(uint16_t y){
 static void build_lut(void){
     for (int ci = 0; ci < TOTAL_CH; ++ci){
         for(int cy = 0; cy < CHAR_H; ++cy){
-            for(int cx = 0; cx < CHAR_W, ++cx){
+            for(int cx = 0; cx < CHAR_W; ++cx){
                 ch_lut[ci][cy][cx] = Font8x8Pixels[(ci*CHAR_H + cy)*CHAR_W + cx];
             }
         }
     }
 }
-
-
-
-
 
 
 void main_vga_task(void *arg){
@@ -35,23 +32,11 @@ void main_vga_task(void *arg){
         //uint16_t next_line = (current_y_line + 1) % 525;
         uint16_t next_line_2 = (current_y_line + 1) % TOTAL_V_FRAMES;
 
-        /*
-        if (is_vsync(next_line_tx)) {
-            desc_front.buf = v_front;
-            desc_hsync.buf = v_hsync;
-            desc_back.buf = v_back;
-        } else {
-            desc_front.buf = h_front;
-            desc_hsync.buf = h_hsync;
-            desc_back.buf = h_back;
-        }
-        */
-
         
         
         uint8_t *dest = (uint8_t*) fill_next;
 
-        if (is_visible(next_line_2)){
+        if (is_visible(next_line_2)){ //&& len > 0){
 
             //render_char(next_line_fill, dst);
 
@@ -74,6 +59,7 @@ void vga_start(void){
 
     init_sem();
     start_buffer_i2s();
+    uart_start();
     i2s_start();
     
     xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 1);

@@ -221,14 +221,7 @@ void i2s_start(void){
 void start_buffer_i2s(void){
 
     frame_init();
-    //vTaskDelay(3000/ portTICK_PERIOD_MS);
-    /*
-    ESP_LOGI("i2s","clkm_div_num=%u, bclk_div=%u, a=%u, b=%u",
-         i2s_c.dev->clkm_conf.clkm_div_num,
-         i2s_c.dev->sample_rate_conf.tx_bck_div_num,
-         i2s_c.dev->clkm_conf.clkm_div_a,
-         i2s_c.dev->clkm_conf.clkm_div_b);
-    */
+
 }
 
 

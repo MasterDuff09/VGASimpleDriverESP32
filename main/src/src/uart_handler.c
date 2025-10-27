@@ -1,6 +1,15 @@
 #include "uart_handler.h"
 
-static void echo_task(void *arg){
+
+SemaphoreHandle_t msg_ready = NULL;
+SemaphoreHandle_t uart_send_avail = NULL;
+
+volatile char msg[BUF_SIZE] = {0};
+
+const char fail[] = FAIL_MSG;
+const char suffix[] = SUFFIX;
+
+static void uart_task(void *arg){
 
     uart_config_t uart_config = {
         .baud_rate = UART_BR,
@@ -17,11 +26,47 @@ static void echo_task(void *arg){
     uart_param_config(UART_PORT_NUM, &uart_config);
     uart_set_pin(UART_PORT_NUM, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS);
 
-    uint8_t *data = (uint8_t *) malloc(BUF_SIZE);
+    char data[BUF_SIZE]; 
+
+    uart_send_avail = xSemaphoreCreateBinary();
+    msg_ready = xSemaphoreCreateBinary();
+
+    xSemaphoreGive(uart_send_avail);
 
     while(true){
-        int len = uart_read_bytes(UART_PORT_NUM, data, (BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
+
+        xSemaphoreTake(uart_send_avail, portMAX_DELAY);
+
+        int len = 0;
+
+        size_t recvd_left_len = 0;
+        
+        len = uart_read_bytes(UART_PORT_NUM, data, (BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
+        
+        uart_get_buffered_data_len(UART_PORT_NUM, &recvd_left_len);
+
+        if (len > 0 && len < BUF_SIZE - 1 && recvd_left_len == 0){
+
+            memcpy(msg, data, len);
+            msg[len] = '\0';
+            xSemaphoreGive(msg_ready);
+
+        } else if (len == 0){
+
+            continue;
+
+        } else {
+
+            memcpy(msg, fail, sizeof(fail));
+            
+        }
+
     }
+}
 
+void uart_start(){
 
+    vTaskDelay(10/portTICK_PERIOD_MS);
+    xTaskCreate(uart_task, "uart_task", TASK_STACK_SIZE, NULL, 10, 0);
+    
 }
