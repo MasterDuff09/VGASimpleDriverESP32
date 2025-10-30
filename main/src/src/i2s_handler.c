@@ -4,8 +4,12 @@
 i2s_hal_context_t i2s_c;
 
 SemaphoreHandle_t line_ready;
+SemaphoreHandle_t display_done;
+
 intr_handle_t i2s_isr_handle;
+
 volatile bool last_eof_A = false;
+
 volatile uint16_t current_y_line = 0;
 
 static inline bool is_vsync(uint16_t y){
@@ -67,6 +71,12 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
 
         __asm__ __volatile__ ("" ::: "memory");
 
+        if (current_y_line == 0){
+            BaseType_t hpw_frame = pdFALSE;
+            xSemaphoreGiveFromISR(display_done, &hpw_frame);
+            if (hpw_frame) portYIELD_FROM_ISR();
+        }
+
         BaseType_t hpw = pdFALSE;
         xSemaphoreGiveFromISR(line_ready, &hpw);
         if (hpw) portYIELD_FROM_ISR();
@@ -111,7 +121,9 @@ void i2s_enable_interrupts(void){
 void init_sem(void){
 
     line_ready = xSemaphoreCreateCounting(4, 0);
+    display_done = xSemaphoreCreateBinary();
     configASSERT(line_ready);
+    configASSERT(display_done);
 }
 
 

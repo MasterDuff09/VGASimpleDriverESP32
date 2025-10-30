@@ -53,7 +53,9 @@ void i2s_start();
 
 extern SemaphoreHandle_t line_ready;
 extern SemaphoreHandle_t display_done;
+
 extern volatile bool last_eof_A;
+
 extern volatile uint16_t current_y_line;
 
 

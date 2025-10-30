@@ -6,8 +6,9 @@ SemaphoreHandle_t uart_send_avail = NULL;
 
 volatile char msg[BUF_SIZE] = {0};
 
-const char fail[] = FAIL_MSG;
-const char suffix[] = SUFFIX;
+
+
+
 
 static void uart_task(void *arg){
 
@@ -21,17 +22,26 @@ static void uart_task(void *arg){
     };
 
     int intr_alloc_flags = 0;
+    
 
     uart_driver_install(UART_PORT_NUM, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags);
     uart_param_config(UART_PORT_NUM, &uart_config);
     uart_set_pin(UART_PORT_NUM, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS);
 
     char data[BUF_SIZE]; 
+    const char fail[] = FAIL_MSG;
+    const char suffix[] = SUFFIX;
+
+    int len_suffix = strlen(suffix);
 
     uart_send_avail = xSemaphoreCreateBinary();
     msg_ready = xSemaphoreCreateBinary();
 
+    configASSERT(uart_send_avail);
+    configASSERT(msg_ready);
+
     xSemaphoreGive(uart_send_avail);
+
 
     while(true){
 
@@ -40,16 +50,17 @@ static void uart_task(void *arg){
         int len = 0;
 
         size_t recvd_left_len = 0;
-        
-        len = uart_read_bytes(UART_PORT_NUM, data, (BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
+
+
+        memcpy(msg, suffix, len_suffix);
+        len = uart_read_bytes(UART_PORT_NUM, data, (BUF_SIZE - 1 - len_suffix), 20 / portTICK_PERIOD_MS);
         
         uart_get_buffered_data_len(UART_PORT_NUM, &recvd_left_len);
 
-        if (len > 0 && len < BUF_SIZE - 1 && recvd_left_len == 0){
-
-            memcpy(msg, data, len);
-            msg[len] = '\0';
-            xSemaphoreGive(msg_ready);
+        if (len > 0 && len < (BUF_SIZE - 1 - len_suffix) && recvd_left_len == 0){
+            memcpy(msg, suffix, len_suffix);
+            memcpy(msg + len_suffix, data, len);
+            msg[len + len_suffix] = '\0';
 
         } else if (len == 0){
 
@@ -60,6 +71,7 @@ static void uart_task(void *arg){
             memcpy(msg, fail, sizeof(fail));
             
         }
+        xSemaphoreGive(msg_ready);
 
     }
 }
