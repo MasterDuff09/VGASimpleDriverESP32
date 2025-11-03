@@ -37,7 +37,7 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
 
         if (last_eof_A){
             
-            if (is_vsync(current_y_line)){
+            if (is_vsync((current_y_line + 1) % TOTAL_V_FRAMES)){
 
                 desc_frontA.buf = v_front;
                 desc_hsyncA.buf = v_hsync;
@@ -53,7 +53,7 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
 
         }   else    {
 
-            if (is_vsync(current_y_line)){
+            if (is_vsync((current_y_line + 1) % TOTAL_V_FRAMES)){
 
                 desc_frontB.buf = v_front;
                 desc_hsyncB.buf = v_hsync;
@@ -112,7 +112,7 @@ void i2s_enable_interrupts(void){
     i2s_c.dev->int_ena.out_total_eof = 1;
     i2s_c.dev->lc_conf.out_eof_mode = 1;
 
-    ESP_ERROR_CHECK(esp_intr_alloc(ETS_I2S1_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL1, i2s_tx_isr, NULL, &i2s_isr_handle));
+    ESP_ERROR_CHECK(esp_intr_alloc(ETS_I2S1_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3, i2s_tx_isr, NULL, &i2s_isr_handle));
 
 }
 
@@ -204,7 +204,7 @@ void i2s_start(void){
     i2s_c.dev->fifo_conf.tx_fifo_mod = 1;
     i2s_c.dev->fifo_conf.dscr_en = 1; 
 
-    i2s_c.dev->conf_chan.tx_chan_mod = 1;
+    i2s_c.dev->conf_chan.tx_chan_mod = 2;
 
     i2s_c.dev->conf.tx_msb_right = 0;
     i2s_c.dev->conf.tx_right_first = 0;

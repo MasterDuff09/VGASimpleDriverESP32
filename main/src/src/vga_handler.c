@@ -940,13 +940,22 @@ void main_vga_task(void *arg){
     build_lut();
     clear_screen();
 
-
+    uint8_t update_pending = false;
     while (true){
 
         if (xSemaphoreTake(msg_ready, 0) == pdTRUE){
             update_screen();
-            xSemaphoreTake(display_done, portMAX_DELAY);
-            xSemaphoreGive(uart_send_avail);
+            update_pending = true;
+        }
+
+        if (update_pending){
+            if (xSemaphoreTake(display_done, 0) == pdTRUE){
+                xSemaphoreGive(uart_send_avail);
+                update_pending = false;
+            } else {
+                xSemaphoreTake(display_done, 0);
+            }
+            
         }
         xSemaphoreTake(line_ready, portMAX_DELAY);
 
@@ -970,12 +979,12 @@ void main_vga_task(void *arg){
             memcpy(dest, is_vsync(next_line_2)? black_lineL : black_lineH, H_ACTIVE_FRAMES);
 
         }
-        
+        /*
         if (++last_delay >= 512){
             last_delay = 0;
             vTaskDelay(0);
         }
-        
+        */
     }
 }
 
@@ -986,5 +995,5 @@ void vga_start(void){
     uart_start();
     i2s_start();
     
-    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 1);
+    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, (configMAX_PRIORITIES - 1), NULL, 1);
 }

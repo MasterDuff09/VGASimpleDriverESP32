@@ -34,8 +34,8 @@
 #define I2S_PORT        I2S1
 #define PIXEL_CLK_HZ    12587500 * 2
 
-#define PIN_HSYNC       18
-#define PIN_VSYNC       19
+#define PIN_HSYNC       19
+#define PIN_VSYNC       18
 #define PIN_R           27
 #define PIN_G           26
 #define PIN_B           25

@@ -64,6 +64,7 @@ static void uart_task(void *arg){
 
         } else if (len == 0){
 
+            xSemaphoreGive(uart_send_avail);
             continue;
 
         } else {
@@ -79,6 +80,6 @@ static void uart_task(void *arg){
 void uart_start(){
 
     vTaskDelay(10/portTICK_PERIOD_MS);
-    xTaskCreate(uart_task, "uart_task", TASK_STACK_SIZE, NULL, 10, 0);
+    xTaskCreate(uart_task, "uart_task", TASK_STACK_SIZE, NULL, 5, 0);
     
 }
