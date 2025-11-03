@@ -17,12 +17,6 @@
 #define V_BACK_PORCH_FRAMES             33
 #define TOTAL_V_FRAMES                  (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_BACK_PORCH_FRAMES + V_SYNC_PULSE_FRAMES)
 
-#define RGB_RES_BITS                    3
-#define H_SYNC_V_SYNC_BITS              2
-
-#define USE_A   1
-#define USE_B   0
-
 #define H_LOW_V_LOW     0b00000000
 #define H_HIGH_V_LOW    0b00000001
 #define H_LOW_V_HIGH    0b00000010

@@ -7,6 +7,7 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp_log.h"
+#include <string.h>
 
 #define PIN_TXD     1
 #define PIN_RXD     3
@@ -22,7 +23,7 @@
 #define FAIL_MSG    "FAILED_MSG"
 #define SUFFIX      "$user: "
 
-extern volatile char msg[BUF_SIZE];
+extern char msg[BUF_SIZE];
 
 extern SemaphoreHandle_t uart_send_avail;
 extern SemaphoreHandle_t msg_ready;

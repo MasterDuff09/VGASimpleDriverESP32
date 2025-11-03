@@ -4,7 +4,7 @@
 SemaphoreHandle_t msg_ready = NULL;
 SemaphoreHandle_t uart_send_avail = NULL;
 
-volatile char msg[BUF_SIZE] = {0};
+char msg[BUF_SIZE] = {0};
 
 
 
