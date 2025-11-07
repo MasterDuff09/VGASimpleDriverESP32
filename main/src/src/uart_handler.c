@@ -1,8 +1,7 @@
 #include "uart_handler.h"
 
 
-SemaphoreHandle_t msg_ready = NULL;
-SemaphoreHandle_t uart_send_avail = NULL;
+
 
 char msg[BUF_SIZE] = {0};
 
@@ -33,12 +32,6 @@ static void uart_task(void *arg){
     const char suffix[] = SUFFIX;
 
     int len_suffix = strlen(suffix);
-
-    uart_send_avail = xSemaphoreCreateBinary();
-    msg_ready = xSemaphoreCreateBinary();
-
-    configASSERT(uart_send_avail);
-    configASSERT(msg_ready);
 
     xSemaphoreGive(uart_send_avail);
 
@@ -80,6 +73,6 @@ static void uart_task(void *arg){
 void uart_start(){
 
     vTaskDelay(10/portTICK_PERIOD_MS);
-    xTaskCreate(uart_task, "uart_task", TASK_STACK_SIZE, NULL, 5, 0);
+    xTaskCreatePinnedToCore(uart_task, "uart_task", TASK_STACK_SIZE, NULL, 5, NULL, 1);
     
 }

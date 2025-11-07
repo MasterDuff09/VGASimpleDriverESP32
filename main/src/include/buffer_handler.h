@@ -1,8 +1,11 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_heap_caps.h"
+#include "soc/soc_memory_layout.h"
 #include "rom/lldesc.h"
 #include "soc/lldesc.h"
+#include "freertos/queue.h"
+#include "freertos/semphr.h"
 
 
 #define H_ACTIVE_FRAMES                 640
@@ -24,18 +27,20 @@
 
 extern lldesc_t desc_frontA, desc_hsyncA, desc_backA, desc_activeA;
 extern lldesc_t desc_frontB, desc_hsyncB, desc_backB, desc_activeB;
-extern uint8_t* h_front;
-extern uint8_t* h_hsync;
-extern uint8_t* h_back;
-extern uint8_t* v_front;
-extern uint8_t* v_hsync;
-extern uint8_t* v_back;
-extern uint8_t* lineA;
-extern uint8_t* lineB;
-extern uint8_t* black_lineH;
-extern uint8_t* black_lineL;
+extern uint8_t h_front[H_FRONT_PORCH_FRAMES];
+extern uint8_t h_hsync[H_SYNC_PULSE_FRAMES];
+extern uint8_t h_back[H_BACK_PORCH_FRAMES];
+extern uint8_t v_front[H_FRONT_PORCH_FRAMES];
+extern uint8_t v_hsync[H_SYNC_PULSE_FRAMES];
+extern uint8_t v_back[H_BACK_PORCH_FRAMES];
+extern uint8_t lineA[H_ACTIVE_FRAMES];
+extern uint8_t lineB[H_ACTIVE_FRAMES];
+extern uint8_t black_lineH[H_ACTIVE_FRAMES];
+extern uint8_t black_lineL[H_ACTIVE_FRAMES];
 //extern volatile uint8_t *tx_next;
 extern volatile uint8_t *fill_next;
+extern SemaphoreHandle_t msg_ready;
+extern SemaphoreHandle_t uart_send_avail;
 
 
 void frame_init(void);

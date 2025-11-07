@@ -25,6 +25,8 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
 
     if (st & I2S_OUT_EOF_INT_ST_M){
 
+        i2s_c.dev->int_clr.out_eof = 1;
+
         lldesc_t *eof_desc = (lldesc_t*) i2s_c.dev->out_eof_des_addr;
         last_eof_A = (eof_desc == &desc_activeA);
 
@@ -80,11 +82,8 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
         BaseType_t hpw = pdFALSE;
         xSemaphoreGiveFromISR(line_ready, &hpw);
         if (hpw) portYIELD_FROM_ISR();
-        
-        i2s_c.dev->int_clr.out_eof = 1;
 
-    }
-
+    }  
     if (st & I2S_OUT_DSCR_ERR_INT_ST_M) {
 
         //isr_flags |= 0x1;
@@ -94,11 +93,11 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
 
     if (st & I2S_OUT_TOTAL_EOF_INT_ST_M) {
 
-        //isr_flags |= 0x4;
-        i2s_c.dev->int_clr.out_total_eof = 1;
+            //isr_flags |= 0x4;
+            i2s_c.dev->int_clr.out_total_eof = 1;
 
     }
-
+    
 }
 
 
@@ -124,6 +123,12 @@ void init_sem(void){
     display_done = xSemaphoreCreateBinary();
     configASSERT(line_ready);
     configASSERT(display_done);
+
+    uart_send_avail = xSemaphoreCreateBinary();
+    msg_ready = xSemaphoreCreateBinary();
+
+    configASSERT(uart_send_avail);
+    configASSERT(msg_ready);
 }
 
 
@@ -157,13 +162,13 @@ static void map_data_pins(void){
     }
 
 }
-
+/*
 static void i2s_set_clock(void){
 
     rtc_clk_apll_enable(true);
     uint32_t div = 0, sdm0 = 0, sdm1 = 0, sdm2 = 0;
     
-    int freq = rtc_clk_apll_coeff_calc(PIXEL_CLK_HZ * 3, &div, &sdm0, &sdm1, &sdm2);
+    int freq = rtc_clk_apll_coeff_calc((PIXEL_CLK_HZ)*3, &div, &sdm0, &sdm1, &sdm2);
     ESP_LOGI("apll", "freq=%u, div=%u, sdm0=%u, sdm1=%u, sdm2=%u", freq, div, sdm0, sdm1, sdm2);
     rtc_clk_apll_coeff_set(div, sdm0, sdm1, sdm2);
 
@@ -181,7 +186,38 @@ static void i2s_set_clock(void){
     
 
 }
+*/
+static void i2s_set_clock(void){
 
+    const int bitCount = 16; 
+    long freq = PIXEL_CLK_HZ* (bitCount / 8); // freq = 25175000 * 2 * (16 / 8) = 100700000
+
+    int sdm, sdmn;
+    int odir = -1;
+    do
+    {	
+        odir++;
+        sdm = (long)(((double)(freq) / (20000000. / (odir + 2))) * 0x10000) - 0x40000;
+        sdmn = (long)(((double)(freq) / (20000000. / (odir + 2 + 1))) * 0x10000) - 0x40000;
+    } while(sdm < 0x8c0ecL && odir < 31 && sdmn < 0xA1fff);
+
+    if(sdm > 0xA1fff) sdm = 0xA1fff;
+    
+    rtc_clk_apll_enable(true);
+    rtc_clk_apll_coeff_set(odir, sdm & 255, (sdm >> 8) & 255, sdm >> 16);
+    
+    ESP_LOGI("apll", "freq=%u, div=%u, sdm0=%u, sdm1=%u, sdm2=%u", (unsigned int)freq, odir, sdm & 255, (sdm >> 8) & 255, sdm >> 16);
+
+    i2s_c.dev->clkm_conf.clka_en = 1;
+
+    i2s_c.dev->clkm_conf.clkm_div_num = 2;
+    i2s_c.dev->clkm_conf.clkm_div_a = 1;
+    i2s_c.dev->clkm_conf.clkm_div_b = 0;
+    i2s_c.dev->sample_rate_conf.tx_bck_div_num = 1;
+
+    
+    i2s_hal_tx_reset_fifo(&i2s_c);
+}
 void i2s_start(void){
 
     map_data_pins();
@@ -194,24 +230,33 @@ void i2s_start(void){
     i2s_hal_tx_reset_fifo(&i2s_c);
     i2s_hal_tx_reset_dma(&i2s_c);
 
+    i2s_c.dev->conf2.val = 0;
     i2s_c.dev->conf2.lcd_en = 1;
-    i2s_c.dev->conf2.lcd_tx_wrx2_en = 0;
+    i2s_c.dev->conf2.lcd_tx_wrx2_en = 1;
     i2s_c.dev->conf2.lcd_tx_sdx2_en = 0;
 
-    i2s_c.dev->sample_rate_conf.tx_bits_mod=8;
+    i2s_c.dev->sample_rate_conf.val = 0;
+    i2s_c.dev->sample_rate_conf.tx_bits_mod=16;
 
+    i2s_set_clock();
+
+    i2s_c.dev->fifo_conf.val = 0;
     i2s_c.dev->fifo_conf.tx_fifo_mod_force_en = 1;
     i2s_c.dev->fifo_conf.tx_fifo_mod = 1;
-    i2s_c.dev->fifo_conf.dscr_en = 1; 
+    i2s_c.dev->fifo_conf.dscr_en = 1;
 
-    i2s_c.dev->conf_chan.tx_chan_mod = 2;
+    i2s_c.dev->conf1.val = 0;
+    i2s_c.dev->conf1.tx_pcm_bypass = 1;
+
+    i2s_c.dev->conf_chan.val = 0;
+    i2s_c.dev->conf_chan.tx_chan_mod = 1;
 
     i2s_c.dev->conf.tx_msb_right = 0;
-    i2s_c.dev->conf.tx_right_first = 0;
+    i2s_c.dev->conf.tx_right_first = 1;
     i2s_c.dev->conf.tx_msb_shift = 0;
     i2s_c.dev->conf.tx_slave_mod = 0;
 
-    i2s_set_clock();
+    
 
     i2s_enable_interrupts();
     

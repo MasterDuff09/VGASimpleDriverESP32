@@ -993,7 +993,8 @@ void vga_start(void){
     init_sem();
     start_buffer_i2s();
     uart_start();
+    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 1);
     i2s_start();
     
-    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, (configMAX_PRIORITIES - 1), NULL, 1);
+    
 }
