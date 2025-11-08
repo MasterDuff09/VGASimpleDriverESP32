@@ -236,7 +236,7 @@ void i2s_start(void){
     i2s_c.dev->conf2.lcd_tx_sdx2_en = 0;
 
     i2s_c.dev->sample_rate_conf.val = 0;
-    i2s_c.dev->sample_rate_conf.tx_bits_mod=16;
+    i2s_c.dev->sample_rate_conf.tx_bits_mod=8;
 
     i2s_set_clock();
 

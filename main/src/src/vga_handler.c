@@ -994,7 +994,7 @@ void vga_start(void){
     start_buffer_i2s();
     uart_start();
     //xTaskCreatePinnedToCore(screen_update_task, "screen_update", 4096, NULL, 10, NULL, 1);
-    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 0);
+    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 1);
     //AO
     i2s_start();
     
