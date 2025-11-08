@@ -936,7 +936,7 @@ static void render_line(uint16_t y, uint8_t* dest){
 
 
 void main_vga_task(void *arg){
-
+    
     build_lut();
     clear_screen();
 
@@ -993,7 +993,8 @@ void vga_start(void){
     init_sem();
     start_buffer_i2s();
     uart_start();
-    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 1);
+    //xTaskCreatePinnedToCore(screen_update_task, "screen_update", 4096, NULL, 10, NULL, 1);
+    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 0);
     i2s_start();
     
     
