@@ -190,7 +190,7 @@ static void i2s_set_clock(void){
 static void i2s_set_clock(void){
 
     const int bitCount = 16; 
-    long freq = PIXEL_CLK_HZ* (bitCount / 8); // freq = 25175000 * 2 * (16 / 8) = 100700000
+    long freq = PIXEL_CLK_HZ * 2 * (bitCount / 8); // freq = 25175000 * 2 * (16 / 8) = 100700000
 
     int sdm, sdmn;
     int odir = -1;
@@ -213,7 +213,7 @@ static void i2s_set_clock(void){
     i2s_c.dev->clkm_conf.clkm_div_num = 2;
     i2s_c.dev->clkm_conf.clkm_div_a = 1;
     i2s_c.dev->clkm_conf.clkm_div_b = 0;
-    i2s_c.dev->sample_rate_conf.tx_bck_div_num = 1;
+    i2s_c.dev->sample_rate_conf.tx_bck_div_num = 2;
 
     
     i2s_hal_tx_reset_fifo(&i2s_c);
