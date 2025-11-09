@@ -1,12 +1,4 @@
-#include "vga_handler.h"
-#include "esp_timer.h"  
-
-static const char *VGA_TASK_TAG = "VGA_TASK";
-//static uint16_t last_delay = 0;
-uint16_t write_on_y = 0;
-
-const unsigned char Font8x8Pixels[] = {
-
+array =[
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -14,18 +6,8 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0,
-/*
-28, 28, 28, 28, 28, 28, 28, 28,
-28, 28, 28, 28, 28, 28, 28, 28,
-28, 28, 28, 28, 28, 28, 28, 28,
-28, 28, 28, 28, 28, 28, 28, 28,
-28, 28, 28, 28, 28, 28, 28, 28,
-28, 28, 28, 28, 28, 28, 28, 28,
-28, 28, 28, 28, 28, 28, 28, 28,
-28, 28, 28, 28, 28, 28, 28, 28, 
-*/
-// Carattere 33: '!'
+0, 0, 0, 0, 0, 0, 0, 0, 
+# Carattere 33: '!'
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
@@ -34,7 +16,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 34: '"'
+# Carattere 34: '"'
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -43,7 +25,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 35: '//'
+# Carattere 35: '#'
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 28, 28, 28, 28, 28, 0, 0, 
@@ -52,7 +34,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 36: '$'
+# Carattere 36: '$'
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 28, 28, 0, 0, 0, 
@@ -61,7 +43,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 28, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
-// Carattere 37: '%'
+# Carattere 37: '%'
 0, 28, 28, 0, 28, 0, 0, 0, 
 0, 28, 28, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -70,7 +52,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 28, 28, 0, 0, 
 0, 0, 28, 0, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 38: '&'
+# Carattere 38: '&'
 0, 0, 28, 28, 0, 0, 0, 0, 
 0, 28, 0, 0, 28, 0, 0, 0, 
 0, 0, 28, 28, 0, 0, 0, 0, 
@@ -79,7 +61,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 28, 0, 0, 0, 
 0, 0, 28, 28, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 39: '''
+# Carattere 39: '''
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -88,7 +70,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 40: '('
+# Carattere 40: '('
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
@@ -97,7 +79,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 41: ')'
+# Carattere 41: ')'
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -106,7 +88,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 42: '28'
+# Carattere 42: '28'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
@@ -115,7 +97,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 43: '+'
+# Carattere 43: '+'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
@@ -124,7 +106,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 44: ','
+# Carattere 44: ','
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -133,7 +115,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
-// Carattere 45: '-'
+# Carattere 45: '-'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -142,7 +124,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 46: '.'
+# Carattere 46: '.'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -151,7 +133,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 47: '/'
+# Carattere 47: '/'
 0, 0, 0, 0, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -160,7 +142,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 48: '0'
+# Carattere 48: '0'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 28, 28, 0, 0, 
@@ -169,7 +151,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 49: '28'
+# Carattere 49: '28'
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -178,7 +160,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 50: '2'
+# Carattere 50: '2'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
@@ -187,7 +169,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 51: '3'
+# Carattere 51: '3'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
@@ -196,7 +178,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 52: '4'
+# Carattere 52: '4'
 0, 0, 0, 0, 28, 28, 0, 0, 
 0, 0, 0, 28, 0, 28, 0, 0, 
 0, 0, 28, 0, 0, 28, 0, 0, 
@@ -205,7 +187,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 53: '5'
+# Carattere 53: '5'
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 28, 28, 28, 0, 0, 0, 
@@ -214,7 +196,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 54: '6'
+# Carattere 54: '6'
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
@@ -223,7 +205,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 55: '7'
+# Carattere 55: '7'
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -232,7 +214,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 56: '8'
+# Carattere 56: '8'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -241,7 +223,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 57: '9'
+# Carattere 57: '9'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -250,7 +232,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 28, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 58: ':'
+# Carattere 58: ':'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
@@ -259,7 +241,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 59: ';'
+# Carattere 59: ';'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
@@ -268,7 +250,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 60: '<'
+# Carattere 60: '<'
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
@@ -277,7 +259,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 61: '='
+# Carattere 61: '='
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -286,7 +268,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 62: '>'
+# Carattere 62: '>'
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
@@ -295,7 +277,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 63: '?'
+# Carattere 63: '?'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
@@ -304,7 +286,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 64: '@'
+# Carattere 64: '@'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 28, 28, 28, 0, 0, 
@@ -313,7 +295,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 65: 'A'
+# Carattere 65: 'A'
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 28, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
@@ -322,7 +304,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 66: 'B'
+# Carattere 66: 'B'
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -331,7 +313,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 67: 'C'
+# Carattere 67: 'C'
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 28, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
@@ -340,7 +322,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 0, 28, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 68: 'D'
+# Carattere 68: 'D'
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -349,7 +331,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 69: 'E'
+# Carattere 69: 'E'
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
@@ -358,7 +340,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 70: 'F'
+# Carattere 70: 'F'
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
@@ -367,7 +349,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 71: 'G'
+# Carattere 71: 'G'
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 28, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
@@ -376,7 +358,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 28, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 72: 'H'
+# Carattere 72: 'H'
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
@@ -385,7 +367,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 73: 'I'
+# Carattere 73: 'I'
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -394,7 +376,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 74: 'J'
+# Carattere 74: 'J'
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
@@ -403,7 +385,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 75: 'K'
+# Carattere 75: 'K'
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 28, 0, 0, 0, 
 0, 28, 0, 28, 0, 0, 0, 0, 
@@ -412,7 +394,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 76: 'L'
+# Carattere 76: 'L'
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
@@ -421,7 +403,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 77: 'M'
+# Carattere 77: 'M'
 0, 28, 0, 0, 0, 0, 0, 28, 
 0, 28, 28, 0, 0, 0, 28, 28, 
 0, 28, 0, 28, 0, 28, 0, 28, 
@@ -430,7 +412,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 28, 
 0, 28, 0, 0, 0, 0, 0, 28, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 78: 'N'
+# Carattere 78: 'N'
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 28, 0, 0, 0, 28, 0, 
 0, 28, 0, 28, 0, 0, 28, 0, 
@@ -439,7 +421,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 79: 'O'
+# Carattere 79: 'O'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -448,7 +430,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 80: 'P'
+# Carattere 80: 'P'
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -457,7 +439,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 81: 'Q'
+# Carattere 81: 'Q'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -466,7 +448,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 28, 28, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 82: 'R'
+# Carattere 82: 'R'
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -475,7 +457,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 83: 'S'
+# Carattere 83: 'S'
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
@@ -484,7 +466,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 84: 'T'
+# Carattere 84: 'T'
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -493,7 +475,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 85: 'U'
+# Carattere 85: 'U'
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
@@ -502,7 +484,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 86: 'V'
+# Carattere 86: 'V'
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
@@ -511,7 +493,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 87: 'W'
+# Carattere 87: 'W'
 0, 28, 0, 0, 0, 0, 0, 28,
 0, 28, 0, 0, 0, 0, 0, 28, 
 0, 28, 0, 0, 0, 0, 0, 28, 
@@ -520,7 +502,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 28, 0, 0, 0, 28, 28, 
 0, 28, 0, 0, 0, 0, 0, 28, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 88: 'X'
+# Carattere 88: 'X'
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 0, 28, 0, 0, 28, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
@@ -529,7 +511,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 89: 'Y'
+# Carattere 89: 'Y'
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 0, 28, 0, 0, 28, 0, 0, 
@@ -538,7 +520,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 90: 'Z'
+# Carattere 90: 'Z'
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -547,7 +529,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 91: '['
+# Carattere 91: '['
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
@@ -556,7 +538,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 92: '\'
+# Carattere 92: '\'
 28, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 0, 0, 0, 0, 0, 
@@ -565,7 +547,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 93: ']'
+# Carattere 93: ']'
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -574,7 +556,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 94: '^'
+# Carattere 94: '^'
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -583,7 +565,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 95: '_'
+# Carattere 95: '_'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -592,7 +574,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 28, 28, 28, 28, 28, 28, 28, 28, 
-// Carattere 96: '`'
+# Carattere 96: '`'
 0, 0, 28, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -601,7 +583,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 97: 'a'
+# Carattere 97: 'a'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
@@ -610,7 +592,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 28, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 98: 'b'
+# Carattere 98: 'b'
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 28, 28, 0, 0, 0, 
@@ -619,7 +601,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 99: 'c'
+# Carattere 99: 'c'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
@@ -628,7 +610,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 0, 28, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 100: 'd'
+# Carattere 100: 'd'
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
@@ -637,7 +619,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 28, 0, 0, 
 0, 0, 0, 28, 28, 28, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 101: 'e'
+# Carattere 101: 'e'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
@@ -646,7 +628,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 102: 'f'
+# Carattere 102: 'f'
 0, 0, 0, 0, 28, 28, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
@@ -655,7 +637,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 103: 'g'
+# Carattere 103: 'g'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
@@ -664,7 +646,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 28, 28, 28, 0, 0, 0, 
-// Carattere 104: 'h'
+# Carattere 104: 'h'
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 28, 28, 0, 0, 0, 
@@ -673,7 +655,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 105: 'i'
+# Carattere 105: 'i'
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
@@ -682,7 +664,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 106: 'j'
+# Carattere 106: 'j'
 0, 0, 0, 0, 0, 28, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 28, 28, 0, 
@@ -691,7 +673,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 28, 28, 0, 
 0, 0, 28, 0, 0, 28, 28, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
-// Carattere 107: 'k'
+# Carattere 107: 'k'
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 28, 0, 0, 0, 
@@ -700,7 +682,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 28, 0, 0, 0, 0, 
 0, 28, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 108: 'l'
+# Carattere 108: 'l'
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
@@ -709,7 +691,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 109: 'm'
+# Carattere 109: 'm'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 28, 0, 28, 28, 0, 0, 
@@ -718,7 +700,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 28, 0, 0, 28, 0, 
 0, 28, 0, 28, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 110: 'n'
+# Carattere 110: 'n'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 28, 28, 28, 0, 0, 0, 
@@ -727,7 +709,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 111: 'o'
+# Carattere 111: 'o'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
@@ -736,7 +718,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 0, 28, 0, 
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 112: 'p'
+# Carattere 112: 'p'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 28, 28, 28, 0, 0, 0, 
@@ -745,7 +727,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 28, 28, 28, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
-// Carattere 113: 'q'
+# Carattere 113: 'q'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
@@ -754,7 +736,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
-// Carattere 114: 'r'
+# Carattere 114: 'r'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 28, 28, 0, 0, 0, 
@@ -763,7 +745,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 115: 's'
+# Carattere 115: 's'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 28, 28, 0, 
@@ -772,7 +754,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 28, 0, 
 0, 28, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 116: 't'
+# Carattere 116: 't'
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
@@ -781,7 +763,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 28, 0, 
 0, 0, 0, 0, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 117: 'u'
+# Carattere 117: 'u'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 28, 0, 0, 
@@ -790,7 +772,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 0, 28, 28, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 118: 'v'
+# Carattere 118: 'v'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
@@ -799,7 +781,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 28, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 119: 'w'
+# Carattere 119: 'w'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 0, 28,
@@ -808,7 +790,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 28, 0, 28, 0, 28, 0, 28, 
 0, 0, 28, 0, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 120: 'x'
+# Carattere 120: 'x'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
@@ -817,7 +799,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 0, 28, 0, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 121: 'y'
+# Carattere 121: 'y'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 28, 0, 0, 0, 0, 28, 0, 
@@ -826,7 +808,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 28, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
-// Carattere 122: 'z'
+# Carattere 122: 'z'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
@@ -835,7 +817,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 28, 28, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 123: '{'
+# Carattere 123: '{'
 0, 0, 0, 0, 28, 28, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 28, 0, 0, 0, 0, 
@@ -844,7 +826,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 28, 28, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 124: '|'
+# Carattere 124: '|'
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
@@ -853,7 +835,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 125: '}'
+# Carattere 125: '}'
 0, 0, 28, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 28, 0, 0, 0, 
@@ -862,7 +844,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 28, 0, 0, 0, 
 0, 0, 28, 28, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 126: '~'
+# Carattere 126: '~'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 0, 28, 0, 28, 0, 
@@ -871,7 +853,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 127: 'DEL'
+# Carattere 127: 'DEL'
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -879,164 +861,17 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0,};
+0, 0, 0, 0, 0, 0, 0, 0]
 
-static uint8_t ch_lut[TOTAL_CH][CHAR_H][CHAR_W] __attribute__((aligned(4)));
-static uint8_t screen[V_ACTIVE_FRAMES / 8][H_ACTIVE_FRAMES / 8];
+lut = [[[0 for colonna in range(8)] for riga in range(8)] for matrice in range(96)]
 
-static inline bool is_visible(uint16_t y){
-    return (y < V_ACTIVE_FRAMES);
-}
+for i in range(96):
+    for j in range(8):
+        for k in range(8):
+            #ch_lut[ci][cy][cx] = Font8x8Pixels[((ci)*CHAR_H + cy)*CHAR_W + cx];
+            if array[(i*8 + j)*8 + k] == 0:
+                lut[i][j][k] = '0'
+            else:
+                lut[i][j][k] = '*'
 
-static inline bool is_vsync(uint16_t y){
-    return (y >= (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES)) && (y < (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_SYNC_PULSE_FRAMES));
-}
-
-static void build_lut(void){
-    for (int ci = 0; ci < TOTAL_CH; ++ci){
-        for(int cy = 0; cy < CHAR_H; ++cy){
-            for(int cx = 0; cx < CHAR_W; ++cx){
-                ch_lut[ci][cy][cx] = Font8x8Pixels[((ci)*CHAR_H + cy)*CHAR_W + cx] | H_HIGH_V_HIGH;
-            }
-        }
-    }
-}
-
-static void clear_screen(void){
-    for (uint8_t i = 0; i < V_ACTIVE_FRAMES / 8; i++){
-        for (uint8_t j = 0; j < H_ACTIVE_FRAMES / 8; j++){
-            screen[i][j] = ' ';
-        }
-    }
-}
-
-static void update_screen(void){
-    uint8_t i = 0;
-    for (; i < H_ACTIVE_FRAMES / 8; i++){
-        screen[write_on_y][i] = ' ';
-    }
-    i = 0;
-    while (msg[i] != '\0'){
-        if (msg[i] == '\r') break; 
-        screen[write_on_y][i] = msg[i];
-        i++;
-    }
-    write_on_y = (write_on_y + 1) % (V_ACTIVE_FRAMES / 8);
-    
-}
-
-static void render_line(uint16_t y, uint8_t* dest){
-    uint16_t row_y = y / CHAR_H;
-    uint16_t line_pixel_y = y % CHAR_H;
-
-    //uint16_t line_pixel_x = 0;
-    uint8_t *current_dest = dest;
-
-    for (uint8_t row_x = 0; row_x < H_ACTIVE_FRAMES / 8; row_x++){
-
-        uint8_t ch = screen[row_y][row_x];
-        if (ch < FIRST_CH || ch >= FIRST_CH + TOTAL_CH){
-            ch = ' ';
-        }
-        uint8_t ci = (uint8_t)(ch - FIRST_CH);
-        /*
-        for (uint8_t pix_char_x = 0; pix_char_x < 8; pix_char_x++){
-            dest[line_pixel_x] = (ch_lut[ci][line_pixel_y][pix_char_x]) 
-            line_pixel_x++;
-        }
-            */
-        const uint8_t* font_slice = &ch_lut[ci][line_pixel_y][0];
-
-        // Copia tutti gli 8 byte (pixel) in una sola volta
-        memcpy(current_dest, font_slice, CHAR_W); // CHAR_W è 8
-        
-        // Sposta il puntatore di destinazione
-        current_dest += CHAR_W;
-    }
-}
-
-
-void main_vga_task(void *arg){
-    
-    build_lut();
-    clear_screen();
-
-    uint8_t update_pending = false;
-    //int64_t last_vsync_time = 0;
-    //int64_t current_vsync_time = 0;
-    while (true){
-
-        if (xSemaphoreTake(msg_ready, 0) == pdTRUE){
-            update_screen();
-            update_pending = true;
-        }
-
-        if (update_pending){
-            if (xSemaphoreTake(display_done, 0) == pdTRUE){
-                /*
-                current_vsync_time = esp_timer_get_time();
-                ESP_LOGI(VGA_TASK_TAG, "Current time: %lld microsecondi", 
-                             current_vsync_time);
-
-                if (last_vsync_time != 0) {
-                    int64_t frame_duration_us = current_vsync_time - last_vsync_time;
-                    
-                    
-                    ESP_LOGI(VGA_TASK_TAG, "Durata V-sync: %lld microsecondi (%.2f ms)", 
-                             frame_duration_us, frame_duration_us / 1000.0);
-                }
-
-                
-                last_vsync_time = current_vsync_time;
-                */
-                xSemaphoreGive(uart_send_avail);
-                update_pending = false;
-            }
-            
-        }
-        xSemaphoreTake(line_ready, portMAX_DELAY);
-        vTaskSuspendAll();
-
-
-        //uint16_t next_line = (current_y_line + 1) % 525;
-        //uint16_t next_line_2 = (current_y_line + 1) % TOTAL_V_FRAMES;
-        uint16_t next_line_2 = (current_y_line + 2) % TOTAL_V_FRAMES;
-
-        
-        
-        uint8_t *dest = (uint8_t*) fill_next;
-
-        if (is_visible(next_line_2)){ //&& len > 0){
-
-            //render_char(next_line_fill, dst);
-            render_line(next_line_2, dest);
-
-
-        } else {
-
-            //memset(dest, is_vsync(next_line_2)? H_HIGH_V_LOW : H_HIGH_V_HIGH, H_ACTIVE_FRAMES);
-            memcpy(dest, is_vsync(next_line_2)? black_lineL : black_lineH, H_ACTIVE_FRAMES);
-
-        }
-        xTaskResumeAll();
-        /*
-        if (++last_delay >= 512){
-            last_delay = 0;
-            vTaskDelay(0);
-        }
-        */
-    }
-}
-
-void vga_start(void){
-
-    init_sem();
-    start_buffer_i2s();
-    uart_start();
-    //xTaskCreatePinnedToCore(screen_update_task, "screen_update", 4096, NULL, 10, NULL, 1);
-    xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 1);
-    //AO
-    i2s_start();
-    
-    
-}
+print(lut[1])

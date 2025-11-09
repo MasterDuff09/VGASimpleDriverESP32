@@ -6,7 +6,7 @@
 #include "driver/uart.h"
 #include "driver/gpio.h"
 #include "sdkconfig.h"
-#include "esp_log.h"
+//#include "esp_log.h"
 #include <string.h>
 
 #define PIN_TXD     1
@@ -18,10 +18,11 @@
 #define UART_BR         115200
 #define TASK_STACK_SIZE 3072
 
-#define BUF_SIZE (80)
 
-#define FAIL_MSG    "FAILED_MSG"
-#define SUFFIX      "$user: "
+#define BUF_SIZE (40)
+
+#define FAIL_MSG    "FAILED_MSG\0"
+#define SUFFIX      "$user: \0"
 
 extern char msg[BUF_SIZE];
 

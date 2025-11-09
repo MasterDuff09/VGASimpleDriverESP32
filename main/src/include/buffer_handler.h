@@ -7,11 +7,19 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 
+//#define HALF_H_RES
 
+#ifndef HALF_H_RES
 #define H_ACTIVE_FRAMES                 640
 #define H_FRONT_PORCH_FRAMES            16
 #define H_SYNC_PULSE_FRAMES             96
 #define H_BACK_PORCH_FRAMES             48
+#else
+#define H_ACTIVE_FRAMES                 320
+#define H_FRONT_PORCH_FRAMES            8
+#define H_SYNC_PULSE_FRAMES             48
+#define H_BACK_PORCH_FRAMES             24
+#endif
 
 
 #define V_ACTIVE_FRAMES                 480

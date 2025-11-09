@@ -23,7 +23,7 @@ static void uart_task(void *arg){
     int intr_alloc_flags = 0;
     
 
-    uart_driver_install(UART_PORT_NUM, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags);
+    uart_driver_install(UART_PORT_NUM, BUF_SIZE * 4, 0, 0, NULL, intr_alloc_flags);
     uart_param_config(UART_PORT_NUM, &uart_config);
     uart_set_pin(UART_PORT_NUM, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS);
 
@@ -45,12 +45,12 @@ static void uart_task(void *arg){
         size_t recvd_left_len = 0;
 
 
-        memcpy(msg, suffix, len_suffix);
+        //memcpy(msg, suffix, len_suffix);
         len = uart_read_bytes(UART_PORT_NUM, data, (BUF_SIZE - 1 - len_suffix), 20 / portTICK_PERIOD_MS);
         
         uart_get_buffered_data_len(UART_PORT_NUM, &recvd_left_len);
 
-        if (len > 0 && len < (BUF_SIZE - 1 - len_suffix) && recvd_left_len == 0){
+        if (len > 0 && len < (BUF_SIZE - 1 - len_suffix)){
             memcpy(msg, suffix, len_suffix);
             memcpy(msg + len_suffix, data, len);
             msg[len + len_suffix] = '\0';
