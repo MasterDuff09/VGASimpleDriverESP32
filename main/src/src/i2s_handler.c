@@ -34,6 +34,7 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
 
         //tx_next = other;
         fill_next = just_used;
+        //fill_next = (uint8_t*) (last_eof_A? desc_activeB.buf : desc_activeA.buf);
 
         current_y_line = (current_y_line + 1) % TOTAL_V_FRAMES;
 
@@ -190,11 +191,7 @@ static void i2s_set_clock(void){
 static void i2s_set_clock(void){
 
     const int bitCount = 8; 
-    #ifdef HALF_H_RES
     long freq = PIXEL_CLK_HZ * 2 * (bitCount / 8); // freq = 25175000 * 2 * (16 / 8) = 100700000
-    #else
-    long freq = PIXEL_CLK_HZ * (bitCount / 8); // freq = 25175000 * 2 * (16 / 8) = 100700000
-    #endif
 
     int sdm, sdmn;
     int odir = -1;

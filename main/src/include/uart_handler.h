@@ -19,7 +19,7 @@
 #define TASK_STACK_SIZE 3072
 
 
-#define BUF_SIZE (40)
+#define BUF_SIZE (80)
 
 #define FAIL_MSG    "FAILED_MSG\0"
 #define SUFFIX      "$user: \0"

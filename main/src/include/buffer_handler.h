@@ -7,7 +7,7 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 
-#define HALF_H_RES
+//#define HALF_H_RES
 
 #ifndef HALF_H_RES
 #define H_ACTIVE_FRAMES                 640
@@ -23,9 +23,9 @@
 
 
 #define V_ACTIVE_FRAMES                 480
-#define V_FRONT_PORCH_FRAMES            10
+#define V_FRONT_PORCH_FRAMES            10 //10
 #define V_SYNC_PULSE_FRAMES             2
-#define V_BACK_PORCH_FRAMES             33
+#define V_BACK_PORCH_FRAMES             33 //33
 #define TOTAL_V_FRAMES                  (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_BACK_PORCH_FRAMES + V_SYNC_PULSE_FRAMES)
 
 #define H_LOW_V_LOW     0b00000000
@@ -35,16 +35,16 @@
 
 extern lldesc_t desc_frontA, desc_hsyncA, desc_backA, desc_activeA;
 extern lldesc_t desc_frontB, desc_hsyncB, desc_backB, desc_activeB;
-extern uint8_t h_front[H_FRONT_PORCH_FRAMES];
-extern uint8_t h_hsync[H_SYNC_PULSE_FRAMES];
-extern uint8_t h_back[H_BACK_PORCH_FRAMES];
-extern uint8_t v_front[H_FRONT_PORCH_FRAMES];
-extern uint8_t v_hsync[H_SYNC_PULSE_FRAMES];
-extern uint8_t v_back[H_BACK_PORCH_FRAMES];
-extern uint8_t lineA[H_ACTIVE_FRAMES];
-extern uint8_t lineB[H_ACTIVE_FRAMES];
-extern uint8_t black_lineH[H_ACTIVE_FRAMES];
-extern uint8_t black_lineL[H_ACTIVE_FRAMES];
+extern uint8_t* h_front;
+extern uint8_t* h_hsync;
+extern uint8_t* h_back;
+extern uint8_t* v_front;
+extern uint8_t* v_hsync;
+extern uint8_t* v_back;
+extern uint8_t* lineA;
+extern uint8_t* lineB;
+extern uint8_t* black_lineH;
+extern uint8_t* black_lineL;
 //extern volatile uint8_t *tx_next;
 extern volatile uint8_t *fill_next;
 extern SemaphoreHandle_t msg_ready;

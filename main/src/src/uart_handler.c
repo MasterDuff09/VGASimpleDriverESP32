@@ -46,11 +46,11 @@ static void uart_task(void *arg){
 
 
         //memcpy(msg, suffix, len_suffix);
-        len = uart_read_bytes(UART_PORT_NUM, data, BUF_SIZE, 20 / portTICK_PERIOD_MS);
+        len = uart_read_bytes(UART_PORT_NUM, data, BUF_SIZE - 1, 20 / portTICK_PERIOD_MS);
         
         //uart_get_buffered_data_len(UART_PORT_NUM, &recvd_left_len);
 
-        if (len > 0 && len < (BUF_SIZE - 1)){
+        if (len > 0){
             /*
             memcpy(msg, suffix, len_suffix);
             memcpy(msg + len_suffix, data, len);

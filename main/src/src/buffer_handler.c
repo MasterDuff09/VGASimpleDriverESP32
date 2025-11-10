@@ -1,24 +1,30 @@
 #include "buffer_handler.h"
 
-DMA_ATTR lldesc_t desc_frontA, desc_hsyncA, desc_backA, desc_activeA;
-DMA_ATTR lldesc_t desc_frontB, desc_hsyncB, desc_backB, desc_activeB;
-DMA_ATTR uint8_t h_front[H_FRONT_PORCH_FRAMES];
-DMA_ATTR uint8_t h_hsync[H_SYNC_PULSE_FRAMES];
-DMA_ATTR uint8_t h_back[H_BACK_PORCH_FRAMES];
-DMA_ATTR uint8_t v_front[H_FRONT_PORCH_FRAMES];
-DMA_ATTR uint8_t v_hsync[H_SYNC_PULSE_FRAMES];
-DMA_ATTR uint8_t v_back[H_BACK_PORCH_FRAMES];
-DMA_ATTR uint8_t lineA[H_ACTIVE_FRAMES];
-DMA_ATTR uint8_t lineB[H_ACTIVE_FRAMES];
-DMA_ATTR uint8_t black_lineH[H_ACTIVE_FRAMES];
-DMA_ATTR uint8_t black_lineL[H_ACTIVE_FRAMES];
+DMA_ATTR lldesc_t desc_frontA;
+DMA_ATTR lldesc_t desc_hsyncA;
+DMA_ATTR lldesc_t desc_backA;
+DMA_ATTR lldesc_t desc_activeA;
+DMA_ATTR lldesc_t desc_frontB;
+DMA_ATTR lldesc_t desc_hsyncB;
+DMA_ATTR lldesc_t desc_backB;
+DMA_ATTR lldesc_t desc_activeB;
+uint8_t* h_front;
+uint8_t* h_hsync;
+uint8_t* h_back;
+uint8_t* v_front;
+uint8_t* v_hsync;
+uint8_t* v_back;
+uint8_t* lineA;
+uint8_t* lineB;
+uint8_t* black_lineH;
+uint8_t* black_lineL;
 
 //volatile uint8_t* tx_next = NULL;
 volatile uint8_t* fill_next = NULL;
 SemaphoreHandle_t msg_ready = NULL;
 SemaphoreHandle_t uart_send_avail = NULL;
 
-/*
+
 static void buffer_init(void){
     
     h_front = heap_caps_malloc(H_FRONT_PORCH_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
@@ -33,7 +39,7 @@ static void buffer_init(void){
     black_lineH = heap_caps_malloc(H_ACTIVE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
     black_lineL = heap_caps_malloc(H_ACTIVE_FRAMES, MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
 }
-*/
+
 
 void fill_costant(void){
     int i = 0;
@@ -103,7 +109,7 @@ static void lldesc_init(void){
 
 void frame_init(void){
 
-    //buffer_init();
+    buffer_init();
     fill_costant();
     lldesc_init();
     
