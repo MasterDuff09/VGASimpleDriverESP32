@@ -120,7 +120,7 @@ void i2s_enable_interrupts(void){
 
 void init_sem(void){
 
-    line_ready = xSemaphoreCreateCounting(4, 0);
+    line_ready = xSemaphoreCreateBinary();//xSemaphoreCreateCounting(4, 0);
     display_done = xSemaphoreCreateBinary();
     configASSERT(line_ready);
     configASSERT(display_done);
@@ -163,7 +163,7 @@ static void map_data_pins(void){
     }
 
 }
-/*
+
 static void i2s_set_clock(void){
 
     rtc_clk_apll_enable(true);
@@ -187,7 +187,8 @@ static void i2s_set_clock(void){
     
 
 }
-*/
+
+/*
 static void i2s_set_clock(void){
 
     const int bitCount = 8; 
@@ -220,6 +221,7 @@ static void i2s_set_clock(void){
     
     i2s_hal_tx_reset_fifo(&i2s_c);
 }
+    */
 void i2s_start(void){
 
     map_data_pins();

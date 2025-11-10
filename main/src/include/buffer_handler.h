@@ -23,9 +23,9 @@
 
 
 #define V_ACTIVE_FRAMES                 480
-#define V_FRONT_PORCH_FRAMES            10 //10
+#define V_FRONT_PORCH_FRAMES            11 //10
 #define V_SYNC_PULSE_FRAMES             2
-#define V_BACK_PORCH_FRAMES             33 //33
+#define V_BACK_PORCH_FRAMES             31 //33
 #define TOTAL_V_FRAMES                  (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_BACK_PORCH_FRAMES + V_SYNC_PULSE_FRAMES)
 
 #define H_LOW_V_LOW     0b00000000
