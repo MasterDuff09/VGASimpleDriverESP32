@@ -7,7 +7,7 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 
-//#define HALF_H_RES
+#define HALF_H_RES
 
 #ifndef HALF_H_RES
 #define H_ACTIVE_FRAMES                 640

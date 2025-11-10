@@ -1,7 +1,7 @@
 #include "vga_handler.h"
 #include "esp_timer.h"  
 
-static const char *VGA_TASK_TAG = "VGA_TASK";
+//static const char *VGA_TASK_TAG = "VGA_TASK";
 //static uint16_t last_delay = 0;
 uint16_t write_on_y = 0;
 
@@ -881,8 +881,9 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0,};
 
-static uint8_t ch_lut[TOTAL_CH][CHAR_H][CHAR_W] __attribute__((aligned(4)));
-static uint8_t screen[V_ACTIVE_FRAMES / 8][H_ACTIVE_FRAMES / 8];
+DRAM_ATTR static uint8_t ch_lut[TOTAL_CH][CHAR_H][CHAR_W] __attribute__((aligned(4)));
+static uint8_t screen[V_ACTIVE_FRAMES / 8][H_ACTIVE_FRAMES / 8]; 
+//static uint8_t screen[V_ACTIVE_FRAMES / 16][H_ACTIVE_FRAMES / 8]; ///////////////////////////////////////ricordati
 
 static inline bool is_visible(uint16_t y){
     return (y < V_ACTIVE_FRAMES);
@@ -903,6 +904,7 @@ static void build_lut(void){
 }
 
 static void clear_screen(void){
+    //for (uint8_t i = 0; i < V_ACTIVE_FRAMES / 16; i++){  //////////////////////////////////////////////////////ricordati
     for (uint8_t i = 0; i < V_ACTIVE_FRAMES / 8; i++){
         for (uint8_t j = 0; j < H_ACTIVE_FRAMES / 8; j++){
             screen[i][j] = ' ';
@@ -922,11 +924,13 @@ static void update_screen(void){
         i++;
     }
     write_on_y = (write_on_y + 1) % (V_ACTIVE_FRAMES / 8);
+    //write_on_y = (write_on_y + 1) % (V_ACTIVE_FRAMES / 16);
     
 }
 
-static void render_line(uint16_t y, uint8_t* dest){
-    uint16_t row_y = y / CHAR_H;
+IRAM_ATTR static void render_line(uint16_t y, uint8_t* dest){
+    uint16_t row_y = y / (CHAR_H);
+    //uint16_t row_y = y / (CHAR_H*2);
     uint16_t line_pixel_y = y % CHAR_H;
 
     //uint16_t line_pixel_x = 0;
@@ -947,10 +951,8 @@ static void render_line(uint16_t y, uint8_t* dest){
             */
         const uint8_t* font_slice = &ch_lut[ci][line_pixel_y][0];
 
-        // Copia tutti gli 8 byte (pixel) in una sola volta
-        memcpy(current_dest, font_slice, CHAR_W); // CHAR_W è 8
+        memcpy(current_dest, font_slice, CHAR_W);
         
-        // Sposta il puntatore di destinazione
         current_dest += CHAR_W;
     }
 }
@@ -966,6 +968,8 @@ void main_vga_task(void *arg){
     //int64_t current_vsync_time = 0;
     while (true){
 
+        update_pending = true;
+        
         if (xSemaphoreTake(msg_ready, 0) == pdTRUE){
             update_screen();
             update_pending = true;
@@ -973,11 +977,11 @@ void main_vga_task(void *arg){
 
         if (update_pending){
             if (xSemaphoreTake(display_done, 0) == pdTRUE){
+                
+                //current_vsync_time = esp_timer_get_time();
+                //ESP_LOGI(VGA_TASK_TAG, "Current time: %lld microsecondi", 
+                //             current_vsync_time);
                 /*
-                current_vsync_time = esp_timer_get_time();
-                ESP_LOGI(VGA_TASK_TAG, "Current time: %lld microsecondi", 
-                             current_vsync_time);
-
                 if (last_vsync_time != 0) {
                     int64_t frame_duration_us = current_vsync_time - last_vsync_time;
                     
@@ -999,8 +1003,8 @@ void main_vga_task(void *arg){
 
 
         //uint16_t next_line = (current_y_line + 1) % 525;
-        //uint16_t next_line_2 = (current_y_line + 1) % TOTAL_V_FRAMES;
-        uint16_t next_line_2 = (current_y_line + 2) % TOTAL_V_FRAMES;
+        uint16_t next_line_2 = (current_y_line + 1) % TOTAL_V_FRAMES;
+        //uint16_t next_line_2 = (current_y_line + 2) % TOTAL_V_FRAMES;
 
         
         
@@ -1034,6 +1038,7 @@ void vga_start(void){
     start_buffer_i2s();
     uart_start();
     //xTaskCreatePinnedToCore(screen_update_task, "screen_update", 4096, NULL, 10, NULL, 1);
+    vTaskDelay(10/portTICK_PERIOD_MS);
     xTaskCreatePinnedToCore(main_vga_task, "render", 4096, NULL, 10, NULL, 1);
     //AO
     i2s_start();

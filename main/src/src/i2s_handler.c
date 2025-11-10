@@ -189,7 +189,7 @@ static void i2s_set_clock(void){
 */
 static void i2s_set_clock(void){
 
-    const int bitCount = 16; 
+    const int bitCount = 8; 
     #ifdef HALF_H_RES
     long freq = PIXEL_CLK_HZ * 2 * (bitCount / 8); // freq = 25175000 * 2 * (16 / 8) = 100700000
     #else
@@ -217,11 +217,7 @@ static void i2s_set_clock(void){
     i2s_c.dev->clkm_conf.clkm_div_num = 2;
     i2s_c.dev->clkm_conf.clkm_div_a = 1;
     i2s_c.dev->clkm_conf.clkm_div_b = 0;
-    #ifdef HALF_H_RES
-    i2s_c.dev->sample_rate_conf.tx_bck_div_num = 2;
-    #else
     i2s_c.dev->sample_rate_conf.tx_bck_div_num = 1;
-    #endif
     
 
     

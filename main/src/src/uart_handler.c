@@ -42,18 +42,24 @@ static void uart_task(void *arg){
 
         int len = 0;
 
-        size_t recvd_left_len = 0;
+        //size_t recvd_left_len = 0;
 
 
         //memcpy(msg, suffix, len_suffix);
-        len = uart_read_bytes(UART_PORT_NUM, data, (BUF_SIZE - 1 - len_suffix), 20 / portTICK_PERIOD_MS);
+        len = uart_read_bytes(UART_PORT_NUM, data, BUF_SIZE, 20 / portTICK_PERIOD_MS);
         
-        uart_get_buffered_data_len(UART_PORT_NUM, &recvd_left_len);
+        //uart_get_buffered_data_len(UART_PORT_NUM, &recvd_left_len);
 
-        if (len > 0 && len < (BUF_SIZE - 1 - len_suffix)){
+        if (len > 0 && len < (BUF_SIZE - 1)){
+            /*
             memcpy(msg, suffix, len_suffix);
             memcpy(msg + len_suffix, data, len);
             msg[len + len_suffix] = '\0';
+            */
+           data[len] = '\0';
+           memcpy(msg, data, len + 1);
+            
+
 
         } else if (len == 0){
 
@@ -73,6 +79,6 @@ static void uart_task(void *arg){
 void uart_start(){
 
     vTaskDelay(10/portTICK_PERIOD_MS);
-    xTaskCreatePinnedToCore(uart_task, "uart_task", TASK_STACK_SIZE, NULL, 5, NULL, 1);
+    xTaskCreatePinnedToCore(uart_task, "uart_task", TASK_STACK_SIZE, NULL, 5, NULL, 0);
     
 }
