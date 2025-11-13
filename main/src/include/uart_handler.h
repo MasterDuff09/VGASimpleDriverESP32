@@ -9,12 +9,12 @@
 //#include "esp_log.h"
 #include <string.h>
 
-#define PIN_TXD     1
-#define PIN_RXD     3
+#define PIN_TXD     1 //17
+#define PIN_RXD     3 //16
 #define PIN_RTS     (UART_PIN_NO_CHANGE)
 #define PIN_CTS     (UART_PIN_NO_CHANGE)
 
-#define UART_PORT_NUM   2
+#define UART_PORT_NUM   2 //1
 #define UART_BR         115200
 #define TASK_STACK_SIZE 3072
 
