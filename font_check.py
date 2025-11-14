@@ -864,6 +864,7 @@ array =[
 0, 0, 0, 0, 0, 0, 0, 0]
 
 lut = [[[0 for colonna in range(8)] for riga in range(8)] for matrice in range(96)]
+doubled = False
 
 for i in range(96):
     for j in range(8):
@@ -871,27 +872,29 @@ for i in range(96):
             #ch_lut[ci][cy][cx] = Font8x8Pixels[((ci)*CHAR_H + cy)*CHAR_W + cx];
             if array[(i*8 + j)*8 + k] == 0:
                 print('0', end = '')
-                print('0', end = '')
+                if doubled:
+                    print('0', end = '')
                 lut[i][j][k] = '0'
             else:
                 print('*', end = '')
-                print('*', end = '')
+                if doubled:
+                    print('*', end = '')
                 lut[i][j][k] = '*'
 
         print()
+        if doubled:
+            for k in range(8):
+                #ch_lut[ci][cy][cx] = Font8x8Pixels[((ci)*CHAR_H + cy)*CHAR_W + cx];
+                if array[(i*8 + j)*8 + k] == 0:
+                    print('0', end = '')
+                    print('0', end = '')
+                    lut[i][j][k] = '0'
+                else:
+                    print('*', end = '')
+                    print('*', end = '')
+                    lut[i][j][k] = '*'
 
-        for k in range(8):
-            #ch_lut[ci][cy][cx] = Font8x8Pixels[((ci)*CHAR_H + cy)*CHAR_W + cx];
-            if array[(i*8 + j)*8 + k] == 0:
-                print('0', end = '')
-                print('0', end = '')
-                lut[i][j][k] = '0'
-            else:
-                print('*', end = '')
-                print('*', end = '')
-                lut[i][j][k] = '*'
-
-        print()
+            print()
     print()
     print()
 
