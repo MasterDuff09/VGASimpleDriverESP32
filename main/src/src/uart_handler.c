@@ -27,7 +27,7 @@ static void uart_task(void *arg){
     uart_param_config(UART_PORT_NUM, &uart_config);
     uart_set_pin(UART_PORT_NUM, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS);
 
-    char data[BUF_SIZE]; 
+    char data[1024]; 
     const char fail[] = FAIL_MSG;
     const char suffix[] = SUFFIX;
 
@@ -46,25 +46,25 @@ static void uart_task(void *arg){
 
 
         //memcpy(msg, suffix, len_suffix);
-        len = uart_read_bytes(UART_PORT_NUM, data, BUF_SIZE - 1, 20 / portTICK_PERIOD_MS);
+        len = uart_read_bytes(UART_PORT_NUM, data, 1024, 20 / portTICK_PERIOD_MS);
         
         //uart_get_buffered_data_len(UART_PORT_NUM, &recvd_left_len);
 
-        if (len > 0){
+        if (len == 0){
+
+            xSemaphoreGive(uart_send_avail);
+            continue;
             /*
             memcpy(msg, suffix, len_suffix);
             memcpy(msg + len_suffix, data, len);
             msg[len + len_suffix] = '\0';
             */
-           data[len] = '\0';
-           memcpy(msg, data, len + 1);
+
+        } else if ((len > 0) && (len < (BUF_SIZE - 1))){
+
             
-
-
-        } else if (len == 0){
-
-            xSemaphoreGive(uart_send_avail);
-            continue;
+            data[len] = '\0';
+            memcpy(msg, data, len + 1);
 
         } else {
 
