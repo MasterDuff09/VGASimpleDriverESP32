@@ -879,6 +879,19 @@ for i in range(96):
                 lut[i][j][k] = '*'
 
         print()
+
+        for k in range(8):
+            #ch_lut[ci][cy][cx] = Font8x8Pixels[((ci)*CHAR_H + cy)*CHAR_W + cx];
+            if array[(i*8 + j)*8 + k] == 0:
+                print('0', end = '')
+                print('0', end = '')
+                lut[i][j][k] = '0'
+            else:
+                print('*', end = '')
+                print('*', end = '')
+                lut[i][j][k] = '*'
+
+        print()
     print()
     print()
 

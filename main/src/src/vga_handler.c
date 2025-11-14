@@ -883,8 +883,8 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0,};
 
-IRAM_ATTR uint8_t ch_lut[TOTAL_CH][8][8];
-static uint8_t screen[V_ACTIVE_FRAMES / CHAR_H][H_ACTIVE_FRAMES / CHAR_W]; 
+WORD_ALIGNED_ATTR uint8_t ch_lut[TOTAL_CH][8][8];
+uint8_t screen[V_ACTIVE_FRAMES / CHAR_H][H_ACTIVE_FRAMES / CHAR_W]; 
 //static uint8_t screen[V_ACTIVE_FRAMES / 16][H_ACTIVE_FRAMES / 8]; ///////////////////////////////////////ricordati
 
 static inline bool is_visible(uint16_t y){
@@ -957,22 +957,22 @@ IRAM_ATTR static void render_line(uint16_t y, uint8_t* dest){
         //memcpy(current_dest, font_slice, CHAR_W);
         uint8_t* font_row = ch_lut[ci][line_pixel_y];
 
-        current_dest[0] = font_row[0];
-        current_dest[1] = font_row[0];
-        current_dest[2] = font_row[1];
-        current_dest[3] = font_row[1];
-        current_dest[4] = font_row[2];
-        current_dest[5] = font_row[2];
-        current_dest[6] = font_row[3];
-        current_dest[7] = font_row[3];
-        current_dest[8] = font_row[4];
-        current_dest[9] = font_row[4];
-        current_dest[10] = font_row[5];
-        current_dest[11] = font_row[5];
-        current_dest[12] = font_row[6];
-        current_dest[13] = font_row[6];
-        current_dest[14] = font_row[7];
-        current_dest[15] = font_row[7];
+        current_dest[0] = font_row[1];
+        current_dest[1] = font_row[1];
+        current_dest[2] = font_row[0];
+        current_dest[3] = font_row[0];
+        current_dest[4] = font_row[3];
+        current_dest[5] = font_row[3];
+        current_dest[6] = font_row[2];
+        current_dest[7] = font_row[2];
+        current_dest[8] = font_row[5];
+        current_dest[9] = font_row[5];
+        current_dest[10] = font_row[4];
+        current_dest[11] = font_row[4];
+        current_dest[12] = font_row[7];
+        current_dest[13] = font_row[7];
+        current_dest[14] = font_row[6];
+        current_dest[15] = font_row[6];
         
         current_dest += CHAR_W;
     }
