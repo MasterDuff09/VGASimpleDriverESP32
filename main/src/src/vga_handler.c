@@ -5,19 +5,8 @@
 //static const char *VGA_TASK_TAG = "VGA_TASK";
 static uint16_t last_delay = 0;
 uint16_t write_on_y = 0;
-
-const unsigned char Font8x8Pixels[] = {
-
 /*
-0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0,
-*/
+const unsigned char Font8x8Pixels[] = {
 28, 28, 28, 28, 28, 28, 28, 28,
 28, 28, 28, 28, 28, 28, 28, 28,
 28, 28, 28, 28, 28, 28, 28, 28,
@@ -35,8 +24,9 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
-0, 0, 0, 28, 28, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 
 // Carattere 34: '"'
+0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -44,8 +34,7 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 0, 
-// Carattere 35: '//'
+// Carattere 35: '#'
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 28, 28, 28, 28, 28, 0, 0, 
@@ -55,14 +44,14 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 28, 0, 28, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 // Carattere 36: '$'
-0, 0, 0, 28, 28, 0, 0, 0, 
-0, 0, 28, 28, 28, 0, 0, 0, 
-0, 28, 0, 28, 28, 0, 0, 0, 
+0, 0, 0, 28, 0, 0, 0, 0, 
+0, 0, 28, 28, 28, 28, 0, 0, 
+0, 28, 0, 28, 0, 0, 0, 0, 
 0, 0, 28, 28, 0, 0, 0, 0, 
-0, 0, 0, 28, 28, 28, 0, 0, 
-0, 0, 0, 28, 0, 28, 0, 0, 
-0, 0, 0, 28, 28, 28, 0, 0, 
 0, 0, 0, 28, 28, 0, 0, 0, 
+0, 0, 0, 28, 0, 28, 0, 0, 
+0, 28, 28, 28, 28, 0, 0, 0, 
+0, 0, 0, 28, 0, 0, 0, 0,  
 // Carattere 37: '%'
 0, 28, 28, 0, 28, 0, 0, 0, 
 0, 28, 28, 0, 28, 0, 0, 0, 
@@ -882,6 +871,204 @@ const unsigned char Font8x8Pixels[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0,};
+*/
+
+static uint64_t font[] = {
+
+0x0, /* (space) */
+
+0x808080800080000, /* ! */
+
+0x2828000000000000, /* " */
+
+0x287C287C280000, /* # */
+
+0x81E281C0A3C0800, /* $ */
+
+0x6094681629060000, /* % */
+
+0x1C20201926190000, /* & */
+
+0x808000000000000, /* ' */
+
+0x810202010080000, /* ( */
+
+0x1008040408100000, /* ) */
+
+0x2A1C3E1C2A000000, /* * */
+
+0x8083E08080000, /* + */
+
+0x81000, /* , */
+
+0x3C00000000, /* - */
+
+0x80000, /* . */
+
+0x204081020400000, /* / */
+
+0x1824424224180000, /* 0 */
+
+0x8180808081C0000, /* 1 */
+
+0x3C420418207E0000, /* 2 */
+
+0x3C420418423C0000, /* 3 */
+
+0x81828487C080000, /* 4 */
+
+0x7E407C02423C0000, /* 5 */
+
+0x3C407C42423C0000, /* 6 */
+
+0x7E04081020400000, /* 7 */
+
+0x3C423C42423C0000, /* 8 */
+
+0x3C42423E023C0000, /* 9 */
+
+0x80000080000, /* : */
+
+0x80000081000, /* ; */
+
+0x6186018060000, /* < */
+
+0x7E007E000000, /* = */
+
+0x60180618600000, /* > */
+
+0x3844041800100000, /* ? */
+
+0x3C449C945C201C, /* @ */
+
+0x1818243C42420000, /* A */
+
+0x7844784444780000, /* B */
+
+0x3844808044380000, /* C */
+
+0x7844444444780000, /* D */
+
+0x7C407840407C0000, /* E */
+
+0x7C40784040400000, /* F */
+
+0x3844809C44380000, /* G */
+
+0x42427E4242420000, /* H */
+
+0x3E080808083E0000, /* I */
+
+0x1C04040444380000, /* J */
+
+0x4448507048440000, /* K */
+
+0x40404040407E0000, /* L */
+
+0x4163554941410000, /* M */
+
+0x4262524A46420000, /* N */
+
+0x1C222222221C0000, /* O */
+
+0x7844784040400000, /* P */
+
+0x1C222222221C0200, /* Q */
+
+0x7844785048440000, /* R */
+
+0x1C22100C221C0000, /* S */
+
+0x7F08080808080000, /* T */
+
+0x42424242423C0000, /* U */
+
+0x8142422424180000, /* V */
+
+0x4141495563410000, /* W */
+
+0x4224181824420000, /* X */
+
+0x4122140808080000, /* Y */
+
+0x7E040810207E0000, /* Z */
+
+0x3820202020380000, /* [ */
+
+0x4020100804020000, /* \ */
+
+0x3808080808380000, /* ] */
+
+0x1028000000000000, /* ^ */
+
+0x7E0000, /* _ */
+
+0x1008000000000000, /* ` */
+
+0x3C023E463A0000, /* a */
+
+0x40407C42625C0000, /* b */
+
+0x1C20201C0000, /* c */
+
+0x2023E42463A0000, /* d */
+
+0x3C427E403C0000, /* e */
+
+0x18103810100000, /* f */
+
+0x344C44340438, /* g */
+
+0x2020382424240000, /* h */
+
+0x800080808080000, /* i */
+
+0x800180808080870, /* j */
+
+0x20202428302C0000, /* k */
+
+0x1010101010180000, /* l */
+
+0x665A42420000, /* m */
+
+0x2E3222220000, /* n */
+
+0x3C42423C0000, /* o */
+
+0x5C62427C4040, /* p */
+
+0x3A46423E0202, /* q */
+
+0x2C3220200000, /* r */
+
+0x1C201804380000, /* s */
+
+0x103C1010180000, /* t */
+
+0x2222261A0000, /* u */
+
+0x424224180000, /* v */
+
+0x81815A660000, /* w */
+
+0x422418660000, /* x */
+
+0x422214081060, /* y */
+
+0x3C08103C0000, /* z */
+
+0x1C103030101C0000, /* { */
+
+0x808080808080800, /* | */
+
+0x38080C0C08380000, /* } */
+
+0x324C000000, /* ~ */
+
+0x7E7E7E7E7E7E0000 /* DEL */
+
+};
+
 
 WORD_ALIGNED_ATTR uint8_t ch_lut[TOTAL_CH][8][8];
 uint8_t screen[V_ACTIVE_FRAMES / CHAR_H][H_ACTIVE_FRAMES / CHAR_W]; 
@@ -895,15 +1082,19 @@ static inline bool is_vsync(uint16_t y){
     return (y >= (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES)) && (y < (V_ACTIVE_FRAMES + V_FRONT_PORCH_FRAMES + V_SYNC_PULSE_FRAMES));
 }
 
+
 static void build_lut(void){
+
     for (int ci = 0; ci < TOTAL_CH; ci++){
         for(int cy = 0; cy < 8; cy++){
             for(int cx = 0; cx < 8; cx++){
-                ch_lut[ci][cy][cx] = Font8x8Pixels[((ci*8) + cy)*8 + cx] | H_HIGH_V_HIGH;
+                ch_lut[ci][cy][cx] = ((((font[ci] >> (8 * (7 - cy))) & 0xFF) >> (7 - cx)) & 0x1) ? 0b00011111 : 0b00000011;//Font8x8Pixels[((ci*8) + cy)*8 + cx] | H_HIGH_V_HIGH;
             }
         }
     }
+
 }
+
 
 static void clear_screen(void){
     //for (uint8_t i = 0; i < V_ACTIVE_FRAMES / 16; i++){  //////////////////////////////////////////////////////ricordati
@@ -943,6 +1134,8 @@ IRAM_ATTR static void render_line(uint16_t y, uint8_t* dest){
 
     //uint16_t line_pixel_x = 0;
     uint8_t *current_dest = dest;
+    //const uint8_t PIXEL_ON = 0b00011111;
+    //const uint8_t PIXEL_OFF = 0b00000011;
 
     for (uint8_t row_x = 0; row_x < (H_ACTIVE_FRAMES / CHAR_W); row_x++){
 
@@ -963,7 +1156,13 @@ IRAM_ATTR static void render_line(uint16_t y, uint8_t* dest){
         //memcpy(current_dest, font_slice, CHAR_W);
         uint8_t* font_row = ch_lut[ci][line_pixel_y];
 
+        //uint8_t font_row = ( font[ci] >> (8 * (7 - line_pixel_y)) ) & 0xFF;
+
+
+        //uint8_t color;
+
         if (CHAR_H == 16){
+            
             current_dest[0] = font_row[1];
             current_dest[1] = font_row[1];
             current_dest[2] = font_row[0];
@@ -980,6 +1179,38 @@ IRAM_ATTR static void render_line(uint16_t y, uint8_t* dest){
             current_dest[13] = font_row[7];
             current_dest[14] = font_row[6];
             current_dest[15] = font_row[6];
+            /*
+            color = ((font_row >> 6) & 0x01) ? PIXEL_ON : PIXEL_OFF;
+            current_dest[0] = color;
+            current_dest[1] = color;
+            color = ((font_row >> 7) & 0x01) ? PIXEL_ON : PIXEL_OFF;
+            current_dest[2] = color;
+            current_dest[3] = color;
+
+
+            color = ((font_row >> 4) & 0x01) ? PIXEL_ON : PIXEL_OFF;
+            current_dest[4] = color;
+            current_dest[5] = color;
+            color = ((font_row >> 5) & 0x01) ? PIXEL_ON : PIXEL_OFF;
+            current_dest[6] = color;
+            current_dest[7] = color;
+
+            color = ((font_row >> 2) & 0x01) ? PIXEL_ON : PIXEL_OFF;
+            current_dest[8] = color;
+            current_dest[9] = color;
+            color = ((font_row >> 3) & 0x01) ? PIXEL_ON : PIXEL_OFF;
+            current_dest[10] = color;
+            current_dest[11] = color;
+
+
+            color = ((font_row >> 0) & 0x01) ? PIXEL_ON : PIXEL_OFF;
+            current_dest[12] = color;
+            current_dest[13] = color;
+            color = ((font_row >> 1) & 0x01) ? PIXEL_ON : PIXEL_OFF;
+            current_dest[14] = color;
+            current_dest[15] = color;
+            */
+
         } else {
             current_dest[0] = font_row[2];
             current_dest[1] = font_row[3];
@@ -1070,12 +1301,13 @@ void main_vga_task(void *arg){
 
         }
         //xTaskResumeAll();
-        
+        /*
         if (++last_delay >= 512){
             last_delay = 0;
             //vTaskDelay(0);
             //esp_task_wdt_reset();
         }
+        */
         
     }
 }
