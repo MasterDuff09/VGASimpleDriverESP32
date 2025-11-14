@@ -11,8 +11,14 @@
 
 typedef struct {
 
-    lldesc_t desc_frontA, desc_hsyncA, desc_backA, desc_activeA;
-    lldesc_t desc_frontB, desc_hsyncB, desc_backB, desc_activeB;
+    DMA_ATTR lldesc_t desc_frontA;
+    DMA_ATTR lldesc_t desc_hsyncA;
+    DMA_ATTR lldesc_t desc_backA;
+    DMA_ATTR lldesc_t desc_activeA;
+    DMA_ATTR lldesc_t desc_frontB;
+    DMA_ATTR lldesc_t desc_hsyncB;
+    DMA_ATTR lldesc_t desc_backB; 
+    DMA_ATTR lldesc_t desc_activeB;
 
 } vga_lldesc_manager_t;
 
