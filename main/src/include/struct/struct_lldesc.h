@@ -1,13 +1,11 @@
-#ifndef LLDESC_H
-#define LLDESC_H
+#ifndef STRUCT_LLDESC
+#define STRUCT_LLDESC
 
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "rom/lldesc.h"
 #include "soc/lldesc.h"
-
-#include "constants.h"
 
 typedef struct {
 
@@ -32,11 +30,11 @@ typedef struct {
     uint8_t* v_back;
     uint8_t* lineA;
     uint8_t* lineB;
+    uint16_t len_front_porch;
+    uint16_t len_back_porch;
+    uint16_t len_h_sync_frames;
+    uint16_t len_active_frames;
 
 }  lldesc_buf_config_t;
-
-
-void vga_lldesc_init(vga_lldesc_manager_t* d, lldesc_buf_config_t* b);
-
 
 #endif
