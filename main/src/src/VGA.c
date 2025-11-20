@@ -10,6 +10,7 @@ static vga_i2s_manager_t i2s = {0};
 static vga_uart_manager_t uart = {0};
 static vga_dimensions_t dim = {0};
 
+
 static inline bool is_in_vsync(uint16_t curr_y){
     uint16_t y1 = i2s.len_v_active + i2s.len_v_front;
     uint16_t y2 = y1 + i2s.len_v_sync;
