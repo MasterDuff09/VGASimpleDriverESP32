@@ -15,7 +15,9 @@ typedef struct {
     uint8_t* v_back;
     uint8_t* lineA;
     uint8_t* lineB;
-    volatile uint8_t* fill_next;
+    uint8_t* black_line_hsync;
+    uint8_t* black_line_vsync;
+    volatile uint8_t* volatile fill_next;
 
 }  vga_buffer_manager_t;
 

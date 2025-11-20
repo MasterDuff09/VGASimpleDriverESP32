@@ -1,4 +1,4 @@
-#include "i2s_manager.h"
+#include "vga_i2s_manager.h"
 #include "vga_lldesc.h"
 #include "vga_buffer.h"
 
@@ -31,39 +31,105 @@
 #include <stdio.h>
 
 static vga_buffer_manager_t buf_m = {0};
-static vga_lldesc_manager_t lld_m = {0};
+static DMA_ATTR vga_lldesc_manager_t lld_m = {0};
+static lldesc_buf_config_t l_buf = {0};
 
 
-static inline bool is_in_vsync(uint16_t curr_y, uint16_t len_active, uint16_t len_front_porch, uint16_t len_v_sync_frames){
-    uint16_t y1 = len_active + len_front_porch;
+static inline bool is_in_vsync(uint16_t curr_y, uint16_t len_v_active, uint16_t len_v_front_porch, uint16_t len_v_sync_frames){
+    uint16_t y1 = len_v_active + len_v_front_porch;
     uint16_t y2 = y1 + len_v_sync_frames;
     return (curr_y >= y1) && (curr_y < y2);
 };
 
-void IRAM_ATTR vga_i2s_tx_isr(void* arg){
+static void IRAM_ATTR vga_i2s_tx_isr(void* arg){
 
     vga_i2s_manager_t* i2s_s = (vga_i2s_manager_t*) (arg);
 
     uint32_t st = i2s_s->i2s_c.dev->int_st.val;
+    uint16_t total_v_frames = (i2s_s->len_v_active) + (i2s_s->len_v_back) + (i2s_s->len_v_front) + (i2s_s->len_v_sync);
 
     if(st & I2S_OUT_EOF_INT_ST_M){
 
         i2s_s->i2s_c.dev->int_clr.out_eof = 1;
 
         lldesc_t *eof_desc = (lldesc_t*) i2s_s->i2s_c.dev->out_eof_des_addr;
-
         i2s_s->last_eof_A = (eof_desc == &(lld_m.desc_activeA));
-
         uint8_t* last_buffer_used = (uint8_t*) (i2s_s->last_eof_A? lld_m.desc_activeA.buf : lld_m.desc_activeB.buf);
 
         buf_m.fill_next = last_buffer_used;
 
-        i2s_s->current_y_line = ()
+        i2s_s->current_y_line = (i2s_s->current_y_line + 1) % (total_v_frames);
+        uint64_t next_y_line = (i2s_s->current_y_line + 1) % (total_v_frames);
+
+
+        if (i2s_s->last_eof_A){
+
+            if (is_in_vsync(next_y_line, i2s_s->len_v_active, i2s_s->len_v_front, i2s_s->len_v_sync)){
+
+                lld_m.desc_frontA.buf = buf_m.v_front;
+                lld_m.desc_hsyncA.buf = buf_m.v_hsync;
+                lld_m.desc_backA.buf  = buf_m.v_back;
+
+            }   else    {
+
+                lld_m.desc_frontA.buf = buf_m.h_front;
+                lld_m.desc_activeA.buf = buf_m.h_hsync;
+                lld_m.desc_backA.buf = buf_m.h_back;
+
+            }
+
+        }   else    {
+
+            if (is_in_vsync(next_y_line, i2s_s->len_v_active, i2s_s->len_v_front, i2s_s->len_v_sync)){
+
+                lld_m.desc_frontB.buf = buf_m.v_front;
+                lld_m.desc_hsyncB.buf = buf_m.v_hsync;
+                lld_m.desc_backB.buf  = buf_m.v_back;
+
+            }   else    {
+                
+                lld_m.desc_frontB.buf = buf_m.h_front;
+                lld_m.desc_activeB.buf = buf_m.h_hsync;
+                lld_m.desc_backB.buf = buf_m.h_back;
+
+            }
+        }
+
+        __asm__ __volatile__ ("" ::: "memory");
+
+        if (i2s_s->current_y_line == 0){
+            BaseType_t hpw_frame = pdFALSE;
+            xSemaphoreGiveFromISR(i2s_s->frame_display_is_done, &hpw_frame);
+            if (hpw_frame)  portYIELD_FROM_ISR();
+        }
+
+        BaseType_t hpw_line = pdFALSE;
+        xSemaphoreGiveFromISR(i2s_s->new_line_ready, &hpw_line);
+        if (hpw_line)   portYIELD_FROM_ISR();
 
     }
 
+    if (st & I2S_OUT_DSCR_ERR_INT_ST_M) i2s_s->i2s_c.dev->int_clr.out_dscr_err = 1;
 
+    if (st & I2S_OUT_TOTAL_EOF_INT_ST_M) i2s_s->i2s_c.dev->int_clr.out_total_eof = 1;
 
+};
+
+static void init_lld_buf_config(lldesc_buf_config_t* l, vga_buffer_manager_t* b, vga_dimensions_t* d){
+
+    l->h_front = b->h_front;
+    l->h_hsync = b->h_hsync;
+    l->h_back = b->h_back;
+    l->v_back = b->v_back;
+    l->v_front = b->v_front;
+    l->v_hsync = b->v_hsync;
+    l->lineA = b->lineA;
+    l->lineB = b->lineB;
+    l->len_active_frames = d->len_active_frames;
+    l->len_back_porch = d->len_back_porch;
+    l->len_front_porch = d->len_front_porch;
+    l->len_h_sync_frames = d->len_h_sync_frames;
+    
 }
 
 
@@ -79,25 +145,8 @@ void init_i2s_semaphore(vga_i2s_manager_t* i2s_s){
 void init_vga_i2s_buffer(vga_i2s_manager_t* i2s_s, vga_dimensions_t* dim){
 
     vga_buffer_init(&buf_m, dim);
-    set_addr_next_buf_to_fill(&buf_m, &(buf_m.lineA));
-
-    lldesc_buf_config_t l_buf = {
-
-        .h_front = buf_m.h_front,
-        .h_hsync = buf_m.h_hsync,
-        .h_back = buf_m.h_back,
-        .v_back = buf_m.v_back,
-        .v_front = buf_m.v_front,
-        .v_hsync = buf_m.v_hsync,
-        .lineA = buf_m.lineA,
-        .lineB = buf_m.lineB,
-        .len_active_frames = dim->len_active_frames,
-        .len_back_porch = dim->len_back_porch,
-        .len_front_porch = dim->len_front_porch,
-        .len_h_sync_frames = dim->len_h_sync_frames
-
-    };
-
+    set_addr_next_buf_to_fill(&buf_m, buf_m.lineA);
+    init_lld_buf_config(&l_buf, &buf_m, dim);
     vga_lldesc_init(&lld_m, &l_buf);
 
 };
@@ -126,7 +175,7 @@ void i2s_set_pins(vga_i2s_manager_t* i2s_s){
     }
 }
 
-void start_i2s_hal (vga_i2s_manager_t* i2s_s){
+void start_i2s_hal(vga_i2s_manager_t* i2s_s){
 
     periph_module_enable(PERIPH_I2S1_MODULE);
 
@@ -134,7 +183,7 @@ void start_i2s_hal (vga_i2s_manager_t* i2s_s){
     i2s_hal_tx_reset(&(i2s_s->i2s_c));
     i2s_hal_tx_reset_fifo(&(i2s_s->i2s_c));
     i2s_hal_tx_reset_dma(&(i2s_s->i2s_c));
-}
+};
 
 void vga_i2s_set_clock_apll(vga_i2s_manager_t* i2s_s){
 
@@ -146,7 +195,7 @@ void vga_i2s_set_clock_apll(vga_i2s_manager_t* i2s_s){
         ESP_LOGE("APLL_CLK", "")
     }
     */
-    int freq = rtc_clk_apll_coeff_calc(freq_apll, &div, &sdm0, &sdm1, &sdm2);
+    rtc_clk_apll_coeff_calc(freq_apll, &div, &sdm0, &sdm1, &sdm2);
     
     rtc_clk_apll_coeff_set(div, sdm0, sdm1, sdm2);
 
@@ -197,8 +246,27 @@ void vga_i2s_set_interrupt (vga_i2s_manager_t* i2s_s){
     i2s_s->i2s_c.dev->int_ena.out_dscr_err = 1;
     i2s_s->i2s_c.dev->int_ena.out_total_eof = 1;
     i2s_s->i2s_c.dev->lc_conf.out_eof_mode = 1;
+    
 
     ESP_ERROR_CHECK(esp_intr_alloc(ETS_I2S1_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3, vga_i2s_tx_isr, (void*)(i2s_s), &(i2s_s->i2s_isr_handle)));
-}
+};
+
+void vga_i2s_enable_dma(vga_i2s_manager_t* i2s_s){
+
+    i2s_hal_tx_enable_dma(&(i2s_s->i2s_c));
+
+};
+
+void vga_i2s_start(vga_i2s_manager_t* i2s_s){
+
+    i2s_s->i2s_c.dev->out_link.stop = 0;
+    i2s_s->i2s_c.dev->out_link.addr = (uint32_t) (&(lld_m.desc_frontA));
+    i2s_s->i2s_c.dev->out_link.start = 1;
+
+    i2s_s->i2s_c.dev->clkm_conf.clka_en = 1;
+
+    i2s_hal_tx_start(&(i2s_s->i2s_c));
+
+};
 
 

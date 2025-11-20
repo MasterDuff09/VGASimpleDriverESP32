@@ -1,4 +1,5 @@
 #include "vga_buffer.h"
+#include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_heap_caps.h"
@@ -26,9 +27,13 @@ void vga_buffer_init(vga_buffer_manager_t* buf_t, vga_dimensions_t* dim){
 
     buf_t->lineA = buffer_malloc(dim->len_active_frames);
     buf_t->lineB = buffer_malloc(dim->len_active_frames);
+    buf_t->black_line_hsync= buffer_malloc(dim->len_active_frames);
+    buf_t->black_line_vsync = buffer_malloc(dim->len_active_frames);
 
     memset(buf_t->lineA, H_HIGH_V_HIGH, dim->len_active_frames);
     memset(buf_t->lineB, H_HIGH_V_HIGH, dim->len_active_frames);
+    memset(buf_t->black_line_hsync, H_HIGH_V_HIGH, dim->len_active_frames);
+    memset(buf_t->black_line_vsync, H_HIGH_V_LOW, dim->len_active_frames);
 
     memset(buf_t->h_hsync, H_LOW_V_HIGH, dim->len_h_sync_frames);
     memset(buf_t->v_hsync, H_LOW_V_LOW, dim->len_h_sync_frames);

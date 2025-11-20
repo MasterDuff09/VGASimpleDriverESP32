@@ -3,20 +3,19 @@
 
 
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "rom/lldesc.h"
 #include "soc/lldesc.h"
 
 typedef struct {
 
-    DMA_ATTR lldesc_t desc_frontA;
-    DMA_ATTR lldesc_t desc_hsyncA;
-    DMA_ATTR lldesc_t desc_backA;
-    DMA_ATTR lldesc_t desc_activeA;
-    DMA_ATTR lldesc_t desc_frontB;
-    DMA_ATTR lldesc_t desc_hsyncB;
-    DMA_ATTR lldesc_t desc_backB; 
-    DMA_ATTR lldesc_t desc_activeB;
+    lldesc_t desc_frontA;
+    lldesc_t desc_hsyncA;
+    lldesc_t desc_backA;
+    lldesc_t desc_activeA;
+    lldesc_t desc_frontB;
+    lldesc_t desc_hsyncB;
+    lldesc_t desc_backB; 
+    lldesc_t desc_activeB;
 
 } vga_lldesc_manager_t;
 
