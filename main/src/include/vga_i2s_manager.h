@@ -16,4 +16,7 @@ void vga_i2s_set_register(vga_i2s_manager_t* i2s_s);
 void vga_i2s_set_interrupt (vga_i2s_manager_t* i2s_s);
 void vga_i2s_enable_dma(vga_i2s_manager_t* i2s_s);
 void vga_i2s_start(vga_i2s_manager_t* i2s_s);
+void* get_next_buf_to_fill();
+void* get_black_line_hsync();
+void* get_black_line_vsync();
 

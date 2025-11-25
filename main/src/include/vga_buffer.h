@@ -8,9 +8,10 @@
 
 
 void vga_buffer_init(vga_buffer_manager_t* buf_t, vga_dimensions_t* dim);
+/*
 void* get_addr_next_buf_to_fill(vga_buffer_manager_t* buf_t);
 void set_addr_next_buf_to_fill(vga_buffer_manager_t* buf_t, uint8_t* addr);
-/*
+
 
 void* get_addr_buf_h_front(vga_buffer_manager_t* buf_t);
 void* get_addr_buf_h_back(vga_buffer_manager_t* buf_t);

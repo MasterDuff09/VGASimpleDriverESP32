@@ -145,7 +145,8 @@ void init_i2s_semaphore(vga_i2s_manager_t* i2s_s){
 void init_vga_i2s_buffer(vga_i2s_manager_t* i2s_s, vga_dimensions_t* dim){
 
     vga_buffer_init(&buf_m, dim);
-    set_addr_next_buf_to_fill(&buf_m, buf_m.lineA);
+    //set_addr_next_buf_to_fill(&buf_m, buf_m.lineA);
+    buf_m.fill_next = buf_m.lineA;
     init_lld_buf_config(&l_buf, &buf_m, dim);
     vga_lldesc_init(&lld_m, &l_buf);
 
@@ -161,13 +162,13 @@ void i2s_set_pins(vga_i2s_manager_t* i2s_s){
     };
     gpio_config(&io);
 
-    esp_rom_gpio_connect_out_signal(pins[0],     I2S1O_DATA_OUT0_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(i2s_s->pin_hsync,     I2S1O_DATA_OUT0_IDX, false, false);
     //gpio_set_direction(PIN_HSYNC, GPIO_MODE_OUTPUT);
     //gpio_set_level(PIN_HSYNC, 1);
-    esp_rom_gpio_connect_out_signal(pins[1],     I2S1O_DATA_OUT1_IDX, false, false);
-    esp_rom_gpio_connect_out_signal(pins[2],     I2S1O_DATA_OUT2_IDX, false, false);
-    esp_rom_gpio_connect_out_signal(pins[3],     I2S1O_DATA_OUT3_IDX, false, false);
-    esp_rom_gpio_connect_out_signal(pins[4],     I2S1O_DATA_OUT4_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(i2s_s->pin_vsync,     I2S1O_DATA_OUT1_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(i2s_s->pin_r,     I2S1O_DATA_OUT2_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(i2s_s->pin_g,     I2S1O_DATA_OUT3_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(i2s_s->pin_b,     I2S1O_DATA_OUT4_IDX, false, false);
     
     for (int i=0;i<5;i++) {
         GPIO.func_out_sel_cfg[pins[i]].oen_sel = 1;
@@ -266,6 +267,24 @@ void vga_i2s_start(vga_i2s_manager_t* i2s_s){
     i2s_s->i2s_c.dev->clkm_conf.clka_en = 1;
 
     i2s_hal_tx_start(&(i2s_s->i2s_c));
+
+};
+
+void* get_next_buf_to_fill(){
+
+    return buf_m.fill_next;
+
+};
+
+void* get_black_line_hsync(){
+
+    return buf_m.black_line_hsync;
+
+};
+
+void* get_black_line_vsync(){
+
+    return buf_m.black_line_vsync;
 
 };
 

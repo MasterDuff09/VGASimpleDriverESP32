@@ -45,6 +45,8 @@ void vga_buffer_init(vga_buffer_manager_t* buf_t, vga_dimensions_t* dim){
     memset(buf_t->v_front, H_HIGH_V_LOW, dim->len_front_porch);
 }
 
+/*
+
 inline void* get_addr_next_buf_to_fill(vga_buffer_manager_t* buf_t){
 
     return  buf_t->fill_next;
@@ -58,7 +60,7 @@ inline void set_addr_next_buf_to_fill(vga_buffer_manager_t* buf_t, uint8_t* addr
 }
 
 
-/*
+
 
 
 inline void* get_addr_buf_h_front(vga_buffer_manager_t* buf_t){
