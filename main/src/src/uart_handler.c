@@ -2,7 +2,6 @@
 
 
 
-
 char msg[BUF_SIZE] = {0};
 
 

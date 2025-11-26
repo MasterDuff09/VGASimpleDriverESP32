@@ -6,10 +6,10 @@
 - MCU used ESP32-WROOM32
 - ESP-IDF Framework for bare-metal programming and debugging (C language)
 - DMA & I2S parallel mode for fast switching digital pins and responsiveness
-- Built-in DAC used to get to required voltage levels for RGB signals
+- (Built-in DAC used to get to required voltage levels for RGB signals) -- NOT USED
 
 
-This project has been started for an University Project (Università La Sapienza Di Roma). It implements a bare VGA driver for an ESP32. It will follow an update once I close this project.
+This project has been started for an University Project (Università La Sapienza Di Roma). It implements a bare VGA driver for an ESP32.
 The main goal for this project is to create a way to send ASCII characters from the Host PC to the MCU through Serial Comm, handle it and then send it from the MCU to a TV through VGA. 
 
 This project is based on the following works, researches and websites:

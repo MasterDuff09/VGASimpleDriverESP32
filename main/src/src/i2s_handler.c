@@ -26,6 +26,7 @@ void IRAM_ATTR i2s_tx_isr(void *arg){
     if (st & I2S_OUT_EOF_INT_ST_M){
 
         i2s_c.dev->int_clr.out_eof = 1;
+        
 
         lldesc_t *eof_desc = (lldesc_t*) i2s_c.dev->out_eof_des_addr;
         last_eof_A = (eof_desc == &desc_activeA);
@@ -243,7 +244,7 @@ void i2s_start(void){
     i2s_c.dev->sample_rate_conf.tx_bits_mod=8;
 
     i2s_set_clock();
-
+    
     i2s_c.dev->fifo_conf.val = 0;
     i2s_c.dev->fifo_conf.tx_fifo_mod_force_en = 1;
     i2s_c.dev->fifo_conf.tx_fifo_mod = 1;
