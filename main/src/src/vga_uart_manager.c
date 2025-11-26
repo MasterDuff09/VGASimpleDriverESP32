@@ -40,6 +40,7 @@ static void uart_task(void* arg){
     uart_driver_install(UART_PORT_NUM, 1024, 0, 0, NULL, intr_alloc_flags);
     uart_param_config(UART_PORT_NUM, &conf);
     uart_set_pin(UART_PORT_NUM, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS);
+    uart_flush_input(UART_PORT_NUM);
 
     char data[1024];
     const char fail[] = FAIL_MSG;

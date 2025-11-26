@@ -13,6 +13,7 @@ static VGA_private* priv;
 static vga_dimensions_t* dim;
 
 static WORD_ALIGNED_ATTR uint8_t char_lut[TOTAL_CH][CHAR_H][CHAR_W];
+static bool wrote_on_screen = true;
 static char* msg_ptr;
 
 
@@ -70,16 +71,23 @@ IRAM_ATTR static void getMessage(void){
     char* invalid_set = "Update pending or colorbg = colortxt\0";
     bool color_error_flag = false;
 
-    const char *clear_cmd = "clear";
-    int len_clear_cmd = 5;
+    const char *clear_cmd_r = "clear\r";
+    const char *clear_cmd_n = "clear\n";
+    const char *clear_cmd_0 = "clear\0";
+    //int len_clear_cmd = 5;
 
-    if (!strncmp(m, clear_cmd, len_clear_cmd)){
+    if (!strcmp(m, clear_cmd_r) || !strcmp(m, clear_cmd_n) || !strcmp(m, clear_cmd_0)){
 
-        clear_screen_until_y(priv->write_on_y);
+        //clear_screen_until_y(priv->write_on_y);
+        clear_screen();
         priv->write_on_y = 0;
+        msg_ptr = "";
+        wrote_on_screen = false;
         return;
 
     }
+
+    wrote_on_screen = true;
 
     const char *prefixbg = "setcolorbg=";
     int len_p_bg = 11;
@@ -141,11 +149,11 @@ IRAM_ATTR static void update(void){
     memset(row_ptr, ' ', priv->char_blocks_x);
 
     int i = 0;
-    while (uart->message[i] != '\0'){
+    while (msg_ptr[i] != '\0'){
         priv->screen[priv->write_on_y][i] = msg_ptr[i];
         i++;
     }
-    priv->write_on_y = (priv->write_on_y + 1) % (priv->char_blocks_y);
+    if (wrote_on_screen) priv->write_on_y = (priv->write_on_y + 1) % (priv->char_blocks_y);
 
 }
 
