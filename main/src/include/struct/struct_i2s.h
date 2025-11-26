@@ -20,11 +20,15 @@ typedef struct {
     uint8_t pin_b;
     uint8_t pin_hsync;
     uint8_t pin_vsync;
+    uint16_t total_v_frames;
     uint16_t len_v_active;
     uint16_t len_v_front;
     uint16_t len_v_back;
     uint16_t len_v_sync;
-    long clock_hz; 
+    uint16_t start_v_sync;
+    uint16_t end_v_sync;
+    long clock_hz;
+
 
 } vga_i2s_manager_t ;
 

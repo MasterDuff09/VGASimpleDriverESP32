@@ -82,7 +82,7 @@ static void uart_task(void* arg){
 
 
 
-};
+}
 
 
 
@@ -93,13 +93,12 @@ void uart_init_sem(vga_uart_manager_t* uart){
     configASSERT(uart->message_ready);
     configASSERT(uart->uart_buffer_available);
 
-};
+}
 
 void uart_start_task(vga_uart_manager_t* uart){
 
     vTaskDelay(10/portTICK_PERIOD_MS);
     xTaskCreatePinnedToCore(uart_task, "uart_task", TASK_STACK_SIZE, (void*)(uart), 5, NULL, 0);
 
-
-};
+}
 

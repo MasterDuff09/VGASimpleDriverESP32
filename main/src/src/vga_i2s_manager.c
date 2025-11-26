@@ -35,18 +35,11 @@ static DMA_ATTR vga_lldesc_manager_t lld_m = {0};
 static lldesc_buf_config_t l_buf = {0};
 
 
-static inline bool is_in_vsync(uint16_t curr_y, uint16_t len_v_active, uint16_t len_v_front_porch, uint16_t len_v_sync_frames){
-    uint16_t y1 = len_v_active + len_v_front_porch;
-    uint16_t y2 = y1 + len_v_sync_frames;
-    return (curr_y >= y1) && (curr_y < y2);
-};
-
 static void IRAM_ATTR vga_i2s_tx_isr(void* arg){
 
     vga_i2s_manager_t* i2s_s = (vga_i2s_manager_t*) (arg);
 
     uint32_t st = i2s_s->i2s_c.dev->int_st.val;
-    uint16_t total_v_frames = (i2s_s->len_v_active) + (i2s_s->len_v_back) + (i2s_s->len_v_front) + (i2s_s->len_v_sync);
 
     if(st & I2S_OUT_EOF_INT_ST_M){
 
@@ -58,13 +51,19 @@ static void IRAM_ATTR vga_i2s_tx_isr(void* arg){
 
         buf_m.fill_next = last_buffer_used;
 
-        i2s_s->current_y_line = (i2s_s->current_y_line + 1) % (total_v_frames);
-        uint64_t next_y_line = (i2s_s->current_y_line + 1) % (total_v_frames);
+        i2s_s->current_y_line++;
+        if (i2s_s->current_y_line >= i2s_s->total_v_frames) {
+            i2s_s->current_y_line = 0;
+        }
+        
+        uint16_t next_y_line = i2s_s->current_y_line + 1;
+        if (next_y_line >= i2s_s->total_v_frames) next_y_line = 0;
 
+        bool in_vsync = (next_y_line >= i2s_s->start_v_sync) && (next_y_line < i2s_s->end_v_sync);
 
         if (i2s_s->last_eof_A){
 
-            if (is_in_vsync(next_y_line, i2s_s->len_v_active, i2s_s->len_v_front, i2s_s->len_v_sync)){
+            if (in_vsync){
 
                 lld_m.desc_frontA.buf = buf_m.v_front;
                 lld_m.desc_hsyncA.buf = buf_m.v_hsync;
@@ -73,14 +72,14 @@ static void IRAM_ATTR vga_i2s_tx_isr(void* arg){
             }   else    {
 
                 lld_m.desc_frontA.buf = buf_m.h_front;
-                lld_m.desc_activeA.buf = buf_m.h_hsync;
+                lld_m.desc_hsyncA.buf = buf_m.h_hsync;
                 lld_m.desc_backA.buf = buf_m.h_back;
 
             }
 
         }   else    {
 
-            if (is_in_vsync(next_y_line, i2s_s->len_v_active, i2s_s->len_v_front, i2s_s->len_v_sync)){
+            if (in_vsync){
 
                 lld_m.desc_frontB.buf = buf_m.v_front;
                 lld_m.desc_hsyncB.buf = buf_m.v_hsync;
@@ -89,7 +88,7 @@ static void IRAM_ATTR vga_i2s_tx_isr(void* arg){
             }   else    {
                 
                 lld_m.desc_frontB.buf = buf_m.h_front;
-                lld_m.desc_activeB.buf = buf_m.h_hsync;
+                lld_m.desc_hsyncB.buf = buf_m.h_hsync;
                 lld_m.desc_backB.buf = buf_m.h_back;
 
             }
@@ -221,6 +220,8 @@ void vga_i2s_set_register(vga_i2s_manager_t* i2s_s){
 
     i2s_s->i2s_c.dev->sample_rate_conf.val = 0;
     i2s_s->i2s_c.dev->sample_rate_conf.tx_bits_mod=8;
+
+    vga_i2s_set_clock_apll(i2s_s);
 
     i2s_s->i2s_c.dev->fifo_conf.val = 0;
     i2s_s->i2s_c.dev->fifo_conf.tx_fifo_mod_force_en = 1;

@@ -11,7 +11,7 @@ typedef struct{
     bool pins;
     bool serial;
     bool start;
-    uint8_t*** char_lut;
+    //uint8_t*** char_lut;
     uint8_t**  screen;
     uint8_t real_char_w;
     uint8_t real_char_h;

@@ -8,15 +8,16 @@
 #include "esp_log.h"
 
 
-static vga_i2s_manager_t i2s = {0};
-static vga_uart_manager_t uart = {0};
-static vga_dimensions_t dim = {0};
-static VGA_private priv = {0};
+static DRAM_ATTR vga_i2s_manager_t i2s = {0};
+static DRAM_ATTR vga_uart_manager_t uart = {0};
+static DRAM_ATTR vga_dimensions_t dim = {0};
+static DRAM_ATTR VGA_private priv = {0};
+static WORD_ALIGNED_ATTR uint8_t char_lut[TOTAL_CH][CHAR_H][CHAR_W];
 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static inline bool is_in_vsync(uint16_t curr_y){
+static inline IRAM_ATTR bool is_in_vsync(uint16_t curr_y){
     uint16_t y1 = i2s.len_v_active + i2s.len_v_front;
     uint16_t y2 = y1 + i2s.len_v_sync;
     return (curr_y >= y1) && (curr_y < y2);
@@ -30,14 +31,14 @@ static inline bool is_visible(uint16_t curr_y){
 
 static void build_lut(void){
 
-    priv.char_lut = heap_caps_malloc(TOTAL_CH, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    //priv.char_lut = heap_caps_malloc(TOTAL_CH * sizeof(uint8_t**), MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     //if (vga_p->char_lut == NULL) ESP_LOGE("Lut_Table", "mem not allocated");
     for (int ci = 0; ci < TOTAL_CH; ci++){
-        priv.char_lut[ci] = heap_caps_malloc(CHAR_H, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+        //priv.char_lut[ci] = heap_caps_malloc(CHAR_H * sizeof(uint8_t*), MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
         for(int cy = 0; cy < 8; cy++){
-            priv.char_lut[ci][cy] = heap_caps_malloc(CHAR_W, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+            //priv.char_lut[ci][cy] = heap_caps_malloc(CHAR_W, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
             for(int cx = 0; cx < 8; cx++){
-                priv.char_lut[ci][cy][cx] = ((((font[ci] >> (8 * (7 - cy))) & 0xFF) >> (7 - cx)) & 0x1) ? priv.vga->text_color : priv.vga->bg_color;//Font8x8Pixels[((ci*8) + cy)*8 + cx] | H_HIGH_V_HIGH;
+                char_lut[ci][cy][cx] = ((((font[ci] >> (8 * (7 - cy))) & 0xFF) >> (7 - cx)) & 0x1) ? priv.vga->text_color : priv.vga->bg_color;//Font8x8Pixels[((ci*8) + cy)*8 + cx] | H_HIGH_V_HIGH;
             }
         }
     }
@@ -45,39 +46,31 @@ static void build_lut(void){
 
 static void build_screen(void){
 
-    priv.screen = heap_caps_malloc(priv.char_blocks_y, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+    priv.screen = heap_caps_malloc(priv.char_blocks_y * sizeof(uint8_t*), MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
     for(int i = 0; i < priv.char_blocks_y; i++) priv.screen[i] = heap_caps_malloc(priv.char_blocks_x, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
 }
 
 static void clear_screen(void){
 
-    for (int i = 0; i < priv.char_blocks_y; i++){
-        for (int j = 0; j < priv.char_blocks_x; j++){
-            priv.screen[i][j] = ' ';
-        }
-    }
+    for (int i = 0; i < priv.char_blocks_y; i++) memset(priv.screen[i], ' ', priv.char_blocks_x);
 }
 
 static void clear_screen_until_y(uint16_t y){
 
-    for (int i = 0; i <= y; i++){
-        for (int j = 0; j < priv.char_blocks_x; j++){
-            priv.screen[i][j] = ' ';
-        }
-    }
+    for (int i = 0; i <= y; i++) memset(priv.screen[i], ' ', priv.char_blocks_x);
 }
 
 IRAM_ATTR static void update(void){
 
     int mod = uart.terminal_mode? 7 : 0;
     char* m = uart.message + mod;
-    const char* invalid_set = "Update pending or colorbg = colortxt\0";
+    char* invalid_set = "Update pending or colorbg = colortxt\0";
     bool color_error_flag = false;
 
-    const char *clear_cmd = "clear\0";
-    int len_clear_cmd = strlen(clear_cmd);
+    const char *clear_cmd = "clear";
+    //int len_clear_cmd = strlen(clear_cmd);
 
-    if (!strcmp(m, clear_cmd)){
+    if (!strncmp(m, clear_cmd, 5)){
 
         clear_screen_until_y(priv.write_on_y);
         priv.write_on_y = 0;
@@ -86,15 +79,13 @@ IRAM_ATTR static void update(void){
     }
 
     const char *prefixbg = "setcolorbg=";
-    int len_p_bg = strlen(prefixbg);
+    int len_p_bg = 11;
 
     const char *prefixtxt= "setcolortext=";
-    int len_p_txt = strlen(prefixtxt);
+    int len_p_txt = 13;
 
-    /*
     const char *prefixterm= "setmode=";
-    int len_p_term = strlen(prefixterm);
-    */
+    int len_p_term = 8;
     int val;
 
     if (!strncmp(m, prefixbg, len_p_bg)){
@@ -103,7 +94,7 @@ IRAM_ATTR static void update(void){
         char *end_val;
 
         val = (int)strtol(start_val, &end_val, 10);
-        if (start_val != end_val && *end_val == '\0') {
+        if (start_val != end_val && (*end_val == '\0' || *end_val == '\r' || *end_val == '\n')) {
             
             uint8_t color = (((uint8_t)(val % 8)) << 2) | 0x3;
             if (!priv.index_update_color_bg_char && color != priv.vga->text_color)  priv.vga->bg_color = color;
@@ -116,33 +107,31 @@ IRAM_ATTR static void update(void){
         char *end_val;
 
         val = (int)strtol(start_val, &end_val, 10);
-        if (start_val != end_val && *end_val == '\0') {
+        if (start_val != end_val && (*end_val == '\0' || *end_val == '\r' || *end_val == '\n')) {
 
             uint8_t color = (((uint8_t)(val % 8)) << 2) | 0x3;
             if (!priv.index_update_color_txt_char && color != priv.vga->bg_color) priv.vga->text_color = color;
             else color_error_flag = true;
         }
-    } /*else if (!strncmp(m, prefixterm, len_p_term)){
+    } else if (!strncmp(m, prefixterm, len_p_term)){
 
         char *start_val = m + len_p_term;
         char *end_val;
 
         val = (int)strtol(start_val, &end_val, 10);
-        if (start_val != end_val && *end_val == '\0') {
+        if (start_val != end_val && (*end_val == '\0' || *end_val == '\r' || *end_val == '\n')) {
             uart.terminal_mode = (val > 0)? true : false;
             int mod = uart.terminal_mode? 1 : 0;
             uart.screen_line_buffer_size = (dim.len_active_frames/(priv.real_char_w)) - (7 * mod);
-
         }
     
     }
-*/
-    uint8_t i = 0;
-    char* msg = color_error_flag? invalid_set : uart.message;
-    for (; i > priv.char_blocks_y; i++){
-        priv.screen[priv.write_on_y][i] = ' ';
-    }
-    i = 0;
+    char* msg = (color_error_flag)? invalid_set : uart.message;
+
+    uint8_t *row_ptr = priv.screen[priv.write_on_y];
+    memset(row_ptr, ' ', priv.char_blocks_x);
+
+    int i = 0;
     while (uart.message[i] != '\0'){
         priv.screen[priv.write_on_y][i] = msg[i];
         i++;
@@ -155,41 +144,51 @@ IRAM_ATTR static void render_line(uint16_t y, uint8_t* dest){
     uint16_t row_y = y / priv.real_char_h;
     uint16_t y_pixel_char;
 
-    if (priv.vga->scaling) y_pixel_char = (y % CHAR_H) / 2;
-    else y_pixel_char = y % CHAR_H;
+    if (priv.vga->scaling) y_pixel_char = (y % priv.real_char_h) / 2;
+    else y_pixel_char = y % priv.real_char_h;
 
+    uint8_t* screen_row = priv.screen[row_y];
     uint8_t* current_dest = dest;
 
-    for (uint8_t row_x = 0; row_x < priv.char_blocks_x; row_x++){
+    if(priv.vga->scaling){
 
-        uint8_t ch = priv.screen[row_y][row_x];
-        if (ch < FIRST_CH || ch >= FIRST_CH + TOTAL_CH){
-            ch = ' ';
-        }
-        uint8_t ci = (uint8_t)(ch - FIRST_CH);
+        for (uint8_t row_x = 0; row_x < priv.char_blocks_x; row_x++){
 
-        uint8_t* font_row = priv.char_lut[ci][y_pixel_char];
+            uint8_t ch = screen_row[row_x];
 
-        if(priv.vga->scaling){
+            if (ch < FIRST_CH || ch >= FIRST_CH + TOTAL_CH) ch = ' ';
+            
+            uint8_t* font_row = char_lut[ch - FIRST_CH][y_pixel_char];
 
-            current_dest[0]  = font_row[1];
+            current_dest[0]  = font_row[1]; 
             current_dest[1]  = font_row[1];
-            current_dest[2]  = font_row[0];
+            current_dest[2]  = font_row[0]; 
             current_dest[3]  = font_row[0];
-            current_dest[4]  = font_row[3];
+            current_dest[4]  = font_row[3]; 
             current_dest[5]  = font_row[3];
-            current_dest[6]  = font_row[2];
+            current_dest[6]  = font_row[2]; 
             current_dest[7]  = font_row[2];
-            current_dest[8]  = font_row[5];
+            current_dest[8]  = font_row[5]; 
             current_dest[9]  = font_row[5];
-            current_dest[10] = font_row[4];
+            current_dest[10] = font_row[4]; 
             current_dest[11] = font_row[4];
-            current_dest[12] = font_row[7];
+            current_dest[12] = font_row[7]; 
             current_dest[13] = font_row[7];
-            current_dest[14] = font_row[6];
+            current_dest[14] = font_row[6]; 
             current_dest[15] = font_row[6];
 
-        } else {
+            current_dest += priv.real_char_w;
+        }
+    } else {
+
+        for (uint8_t row_x = 0; row_x < priv.char_blocks_x; row_x++){
+
+            uint8_t ch = screen_row[row_x];
+
+            if (ch < FIRST_CH || ch >= FIRST_CH + TOTAL_CH) ch = ' ';
+            
+            uint8_t* font_row = char_lut[ch - FIRST_CH][y_pixel_char];
+
 
             current_dest[0] = font_row[2];
             current_dest[1] = font_row[3];
@@ -200,9 +199,8 @@ IRAM_ATTR static void render_line(uint16_t y, uint8_t* dest){
             current_dest[6] = font_row[4];
             current_dest[7] = font_row[5];
 
+            current_dest += priv.real_char_w;
         }
-
-        current_dest += priv.real_char_w;
     }
 
     
@@ -213,11 +211,11 @@ static void update_lut(void){
 
     if (priv.vga->bg_color != priv.last_bg_color){
             for (int i = 0; i < CHAR_H; i++){
-                for (int j = 0; i < CHAR_W; j++){
+                for (int j = 0; j < CHAR_W; j++){
                     //priv.char_lut[priv.index_update_color_char][i][j] = ((priv.char_lut[priv.index_update_color_char][i][0]) & 0x3) | priv.vga->text_color;
                     //uint8_t bg_pixel = (priv.char_lut[priv.index_update_color_bg_char][i][j] == priv.last_bg_color);
-                    uint8_t state_pixel = priv.char_lut[priv.index_update_color_bg_char][i][j];
-                    priv.char_lut[priv.index_update_color_bg_char][i][j] = (state_pixel == priv.last_bg_color)? priv.vga->bg_color : state_pixel;
+                    uint8_t state_pixel = char_lut[priv.index_update_color_bg_char][i][j];
+                    char_lut[priv.index_update_color_bg_char][i][j] = (state_pixel == priv.last_bg_color)? priv.vga->bg_color : state_pixel;
                 }
             }
             priv.index_update_color_bg_char = (priv.index_update_color_bg_char + 1) % TOTAL_CH;
@@ -226,16 +224,17 @@ static void update_lut(void){
 
         if (priv.vga->text_color != priv.last_text_color){
             for (int i = 0; i < CHAR_H; i++){
-                for (int j = 0; i < CHAR_W; j++){
+                for (int j = 0; j < CHAR_W; j++){
                     //priv.char_lut[priv.index_update_color_char][i][j] = ((priv.char_lut[priv.index_update_color_char][i][0]) & 0x3) | priv.vga->text_color;
                     //uint8_t bg_pixel = (priv.char_lut[priv.index_update_color_bg_char][i][j] == priv.last_bg_color);
-                    uint8_t state_pixel = priv.char_lut[priv.index_update_color_txt_char][i][j];
-                    priv.char_lut[priv.index_update_color_txt_char][i][j] = (state_pixel == priv.last_text_color)? priv.vga->text_color : state_pixel;
+                    uint8_t state_pixel = char_lut[priv.index_update_color_txt_char][i][j];
+                    char_lut[priv.index_update_color_txt_char][i][j] = (state_pixel == priv.last_text_color)? priv.vga->text_color : state_pixel;
                 }
             }
             priv.index_update_color_txt_char = (priv.index_update_color_txt_char + 1) % TOTAL_CH;
             if (!priv.index_update_color_txt_char) priv.last_text_color = priv.vga->text_color;
         }
+    
 
 }
 static void main_vga_task(void *arg){
@@ -244,6 +243,10 @@ static void main_vga_task(void *arg){
     priv.real_char_h = priv.vga->scaling? CHAR_H * 2 : CHAR_H;
     priv.char_blocks_y = dim.len_v_active_frames / (priv.real_char_h);
     priv.char_blocks_x = dim.len_active_frames / (priv.real_char_w);
+
+    if (uart.screen_line_buffer_size == 0) {
+        uart.screen_line_buffer_size = dim.len_active_frames / priv.real_char_w;
+    }
 
     uint16_t total_v_frames = dim.len_v_active_frames + dim.len_v_back_porch + dim.len_v_front_porch + dim.len_v_sync_frames;
 
@@ -256,13 +259,13 @@ static void main_vga_task(void *arg){
     while(true){
 
         if (xSemaphoreTake(uart.message_ready, 0) == pdTRUE){
-            update();
-            update_pending = true;
+                update();
+                update_pending = true;
         }
 
         if (update_pending){
 
-            if(xSempahoreTake(i2s.frame_display_is_done, 0) == pdTRUE){
+            if(xSemaphoreTake(i2s.frame_display_is_done, 0) == pdTRUE){
 
                 xSemaphoreGive(uart.uart_buffer_available);
                 update_pending = false;
@@ -273,12 +276,19 @@ static void main_vga_task(void *arg){
         xSemaphoreTake(i2s.new_line_ready, portMAX_DELAY);
 
         update_lut();
-        uint16_t y_2 = (i2s.current_y_line + 1) % total_v_frames;
-        uint8_t *dest = (uint8_t*) next_buf_to_fill();
+        
+        uint16_t y_2 = (i2s.current_y_line + 1);
+        if (y_2 >= total_v_frames) y_2 = 0;
+        uint8_t *dest = (uint8_t*) get_next_buf_to_fill();
 
 
-        if(is_visible(y_2)){} // render_line;
-        else  memcpy(dest, is_in_vsync(y_2)? (uint8_t*)(get_black_line_vsync()) : (uint8_t*)(get_black_line_hsync()), dim.len_active_frames);
+        if(is_visible(y_2)){
+
+            render_line(y_2, dest);// render_line;
+
+        } else {
+            memcpy(dest, is_in_vsync(y_2)? (uint8_t*)(get_black_line_vsync()) : (uint8_t*)(get_black_line_hsync()), dim.len_active_frames);
+        }
         
     }
 
@@ -319,6 +329,13 @@ void VGAinit(VGA* vga, long freq, uint16_t WIDTH, uint16_t h_front_porch_length,
     priv.last_text_color = priv.vga->text_color;
     priv.vga->bg_color = 0x3;
     priv.last_bg_color = priv.vga->bg_color;
+
+    i2s.total_v_frames = HEIGHT + v_front_porch_length + v_back_porch_length + v_sync_pulse;
+    i2s.start_v_sync = HEIGHT + v_front_porch_length;
+    i2s.end_v_sync = i2s.start_v_sync + v_sync_pulse;
+
+    vga->scaling = false;
+
     priv.init = true;
 
 };
@@ -347,7 +364,7 @@ void VGAsetSerial(VGA* vga, uint64_t baudrate, uint8_t data_bits, uint8_t parity
     uart.parity = parity;
     uart.stop_bits = stop_bits;
     uart.screen_line_buffer_size = uart.screen_line_buffer_size? (dim.len_active_frames/(priv.real_char_w)) : uart.screen_line_buffer_size;
-
+    uart.terminal_mode = false;
 
     priv.serial = true;
 
@@ -395,6 +412,7 @@ void VGA_Start(){
     if (!priv.pins) ESP_LOGE("VGA", "Pins not initialized");
     if (!priv.serial) ESP_LOGE("VGA", "Serial not configured");
     priv.start = true;
+    ESP_LOGI("VGA", "START");
 
     uart_init_sem(&uart);
     init_i2s_semaphore(&i2s);
@@ -406,7 +424,7 @@ void VGA_Start(){
 
     i2s_set_pins(&i2s);
     start_i2s_hal(&i2s);
-    vga_i2s_set_clock_apll(&i2s);
+    //vga_i2s_set_clock_apll(&i2s);
     vga_i2s_set_register(&i2s);
     vga_i2s_set_interrupt(&i2s);
     vga_i2s_enable_dma(&i2s);
