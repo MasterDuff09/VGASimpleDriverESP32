@@ -78,7 +78,6 @@ IRAM_ATTR static void getMessage(void){
 
     if (!strcmp(m, clear_cmd_r) || !strcmp(m, clear_cmd_n) || !strcmp(m, clear_cmd_0)){
 
-        //clear_screen_until_y(priv->write_on_y);
         clear_screen();
         priv->write_on_y = 0;
         msg_ptr = "";
