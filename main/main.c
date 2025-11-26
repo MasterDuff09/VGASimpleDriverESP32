@@ -12,6 +12,7 @@ void app_main(void){
     //start_buffer_i2s();
     
     fflush(stdout);
+    //yessirrrrrrrrrrrrrrrrrrrrrrr
 */
     vga_start();
     return;
